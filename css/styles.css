@@ -1,0 +1,180 @@
+/* Globales */
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+/* Navbar */
+
+/* Header */
+
+header {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 10px 0;
+    margin-top: 50px;
+}
+
+header h1{
+    font-family: 'lexend', 'lato', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 20px 0;
+    color: #333;    
+}
+
+body {
+    margin: 0 auto;
+    max-width:max-content;
+    font-family: 'lexend', 'lato';
+background: #ffe6ed;
+background: radial-gradient(circle, rgba(255, 230, 237, 1) 0%, rgba(230, 243, 255, 1) 100%);
+}
+
+h1{
+    font-family: 'lexend', 'lato', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 20px 0;
+    color: #333;    
+}
+
+h2{
+    text-decoration: none;
+}
+
+
+.gamezone-icon {
+    position: static;
+transform: none;
+margin-right: 2px;}
+
+.gamezone-icon img {
+    width: 80px;
+    height: 80px;
+ 
+}   
+
+.container-home {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.home-icon {
+    width: 40px;
+    height: 40px;
+} 
+
+.container-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+
+
+
+img {
+    max-width: 100%;
+    padding : 0
+    
+    
+}
+
+
+
+
+
+
+
+/* main */
+
+
+.container-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    
+
+}
+
+
+
+
+.item {
+    border-radius: 15px;
+    background: #fff;
+    padding: 0px;
+    transition: box-shadow 0.3s;
+    
+
+    
+}
+
+.item h2    {
+    font-family: 'lato', 'lexend', sans-serif;
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 10px 0;
+    color: #333;
+}
+
+
+.item figure {
+    margin: 0;
+    padding: 0;
+}
+
+
+.item img {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 15px 15px 0px 0px;
+}
+
+.item:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.70)   ;
+    }
+
+
+.info-producto{
+    font-family: 'lato', 'lexend';
+}
+
+/* Categorías */
+.categoriatitle {
+    font-family: 'lexend', 'lato', sans-serif;
+    text-align: center;
+    font-size: 2rem;
+    margin: 20px 0;
+    color: #333;
+}
+
+.info-producto-videojuego {
+    padding: 10px;
+    text-align: center;
+    font-family: 'lato', 'lexend', sans-serif;
+    
+}
+
+.info-producto-videojuego button {
+    background: #9b6ee2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
