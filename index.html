@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmScoper</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-sm bg-body-tertiary w-100 fixed-top">
+    <div class="container-fluid">
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="accion.html">Acción</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="comedia.html">Comedia</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="documentales.html">Documental</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="romantica.html">Romance</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="terror.html">Terror</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Registro.html">Registrarse</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Header -->
+<header>
+    <div class="filmscoper-icon">
+        <img src="img/icons/filmscoperlogo.svg" alt="FilmScoper Logo">
+    </div>
+    <h1>FilmScoper</h1>
+</header>
+
+<!-- Carousel -->
+<div id="carouselExampleAutoplaying" class="container-flex carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="img/banners/loqueelpulpomeenseño-banner.PNG" class="d-block w-100" alt="...">
+        </div>
+        <div class="carousel-item">
+            <img src="img/banners/it-follows-banner.jpg" class="d-block w-100" alt="...">
+        </div>
+        <div class="carousel-item">
+            <img src="img/banners/mad-max-banner.jpg" class="d-block w-100" alt="...">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Título de sección -->
+<div class="titulo-seccion">
+    <h1>Más Rankeadas</h1>
+</div>
+
+<!-- Grid de películas -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Primera fila -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=skyfall">
+                    <div class="item">
+                        <img src="img/accion/007-skyfall.webp" alt="007 Skyfall">
+                        <div class="info-overlay">
+                            <div class="title">007: Skyfall</div>
+                            <div class="year">2012</div>
+                            <div class="genre">Acción, Thriller</div>
+                            <div class="rating">⭐ 7.8/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=chicas-malas">
+                    <div class="item">
+                        <img src="img/comedia/chicas-malas.webp" alt="Chicas Malas">
+                        <div class="info-overlay">
+                            <div class="title">Chicas Malas</div>
+                            <div class="year">2004</div>
+                            <div class="genre">Comedia, Drama</div>
+                            <div class="rating">⭐ 7.0/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=free-solo">
+                    <div class="item">
+                        <img src="img/documentales/free-solo.webp" alt="Free Solo">
+                        <div class="info-overlay">
+                            <div class="title">Free Solo</div>
+                            <div class="year">2018</div>
+                            <div class="genre">Documental, Deportes</div>
+                            <div class="rating">⭐ 8.1/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=eterno-resplandor">
+                    <div class="item">
+                        <img src="img/romantica/eterno-resplandor.webp" alt="Eterno Resplandor">
+                        <div class="info-overlay">
+                            <div class="title">Eterno Resplandor</div>
+                            <div class="year">2004</div>
+                            <div class="genre">Romance, Drama</div>
+                            <div class="rating">⭐ 8.3/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=babadook">
+                    <div class="item">
+                        <img src="img/terror/babadook.webp" alt="The Babadook">
+                        <div class="info-overlay">
+                            <div class="title">The Babadook</div>
+                            <div class="year">2014</div>
+                            <div class="genre">Terror, Drama</div>
+                            <div class="rating">⭐ 6.8/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=gladiador">
+                    <div class="item">
+                        <img src="img/accion/gladiador.webp" alt="Gladiador">
+                        <div class="info-overlay">
+                            <div class="title">Gladiador</div>
+                            <div class="year">2000</div>
+                            <div class="genre">Acción, Drama</div>
+                            <div class="rating">⭐ 8.5/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Segunda fila -->
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=titanic">
+                    <div class="item">
+                        <img src="img/romantica/titanic.webp" alt="Titanic">
+                        <div class="info-overlay">
+                            <div class="title">Titanic</div>
+                            <div class="year">1997</div>
+                            <div class="genre">Romance, Drama</div>
+                            <div class="rating">⭐ 7.9/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=gran-hotel-budapest">
+                    <div class="item">
+                        <img src="img/comedia/gran-hotel-budapest.webp" alt="Gran Hotel Budapest">
+                        <div class="info-overlay">
+                            <div class="title">Gran Hotel Budapest</div>
+                            <div class="year">2014</div>
+                            <div class="genre">Comedia, Drama</div>
+                            <div class="rating">⭐ 8.1/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=el-caballero-oscuro">
+                    <div class="item">
+                        <img src="img/accion/el-caballero-oscuro.webp" alt="El Caballero Oscuro">
+                        <div class="info-overlay">
+                            <div class="title">El Caballero Oscuro</div>
+                            <div class="year">2008</div>
+                            <div class="genre">Acción, Crime</div>
+                            <div class="rating">⭐ 9.0/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=donde-estan-las-rubias">
+                    <div class="item">
+                        <img src="img/comedia/donde-estan-las-rubias.webp" alt="¿...Y dónde están las rubias?">
+                        <div class="info-overlay">
+                            <div class="title">¿Y dónde están las rubias?</div>
+                            <div class="year">2004</div>
+                            <div class="genre">Comedia</div>
+                            <div class="rating">⭐ 5.8/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=social-dilema">
+                    <div class="item">
+                        <img src="img/documentales/social-dilema.webp" alt="El Dilema Social">
+                        <div class="info-overlay">
+                            <div class="title">El Dilema Social</div>
+                            <div class="year">2020</div>
+                            <div class="genre">Documental</div>
+                            <div class="rating">⭐ 7.6/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="pelicula.html?movie=lalaland">
+                    <div class="item">
+                        <img src="img/romantica/lalaland.webp" alt="La La Land">
+                        <div class="info-overlay">
+                            <div class="title">La La Land</div>
+                            <div class="year">2016</div>
+                            <div class="genre">Romance, Musical</div>
+                            <div class="rating">⭐ 8.0/10</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+
+</body>
+</html>
