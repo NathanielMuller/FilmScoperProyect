@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmScoper</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-sm bg-body-tertiary w-100 fixed-top">
+    <div class="container-fluid">
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Acción</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="comedia.html">Comedia</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="documentales.html">Documental</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="romantica.html">Romance</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="terror.html">Terror</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Mi Cuenta
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="iniciar-sesion.html">Iniciar Sesión</a></li>
+                        <li><a class="dropdown-item" href="Registro.html">Registrarse</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="recuperar-password.html">Recuperar Contraseña</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!--header-->
+<header>
+    <div class="filmscoper-icon">
+        <img src="img/icons/filmscoperlogo.svg" alt="icono filmscoper">
+    </div>
+    <h1>FilmScoper</h1>
+</header>
+
+<!-- Título de sección -->
+<div class="titulo-seccion">
+    <h1>Películas de Acción</h1>
+</div>
+
+<!-- Estructura items -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="pelicula.html?movie=skyfall">
+                <div class="item">
+                    <figure>
+                        <img src="img/accion/007-skyfall.webp" alt="007 Skyfall">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>007: Skyfall</h3>
+                        <div class="year">2012</div>
+                        <div class="genre">Acción</div>
+                        <div class="rating">⭐ 7.8/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="pelicula.html?movie=gladiador">
+                <div class="item">
+                    <figure>
+                        <img src="img/accion/gladiador.webp" alt="Gladiador">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Gladiador</h3>
+                        <div class="year">2000</div>
+                        <div class="genre">Acción</div>
+                        <div class="rating">⭐ 8.5/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="pelicula.html?movie=el-caballero-oscuro">
+                <div class="item">
+                    <figure>
+                        <img src="img/accion/el-caballero-oscuro.webp" alt="El Caballero Oscuro">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>El Caballero Oscuro</h3>
+                        <div class="year">2008</div>
+                        <div class="genre">Acción</div>
+                        <div class="rating">⭐ 9.0/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="pelicula.html?movie=mad-max">
+                <div class="item">
+                    <figure>
+                        <img src="img/accion/mad-max.webp" alt="Mad Max: Fury Road">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Mad Max: Fury Road</h3>
+                        <div class="year">2015</div>
+                        <div class="genre">Acción</div>
+                        <div class="rating">⭐ 8.1/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="pelicula.html?movie=vengadores-endgame">
+                <div class="item">
+                    <figure>
+                        <img src="img/accion/vengadores-endgame.webp" alt="Vengadores: Endgame">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Vengadores: Endgame</h3>
+                        <div class="year">2019</div>
+                        <div class="genre">Acción</div>
+                        <div class="rating">⭐ 8.4/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+</body>
+</html>

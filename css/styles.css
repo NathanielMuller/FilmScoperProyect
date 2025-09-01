@@ -22,7 +22,7 @@ header {
 }
 
 header h1{
-    font-family: 'lexend', 'lato', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-size: 2.5rem;
     text-align: center;
     margin: 20px 0;
@@ -32,13 +32,12 @@ header h1{
 body {
     margin: 0 auto;
     max-width:max-content;
-    font-family: 'lexend', 'lato';
-background: #ffe6ed;
-background: radial-gradient(circle, rgba(255, 230, 237, 1) 0%, rgba(230, 243, 255, 1) 100%);
+    font-family: 'Lato', sans-serif;
+background: 3333ff;
 }
 
 h1{
-    font-family: 'lexend', 'lato', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-size: 2.5rem;
     text-align: center;
     margin: 20px 0;
@@ -50,15 +49,14 @@ h2{
 }
 
 
-.gamezone-icon {
+.filmscoper-icon {
     position: static;
 transform: none;
 margin-right: 2px;}
 
-.gamezone-icon img {
+.filmscoper-icon img {
     width: 80px;
     height: 80px;
- 
 }   
 
 .container-home {
@@ -90,12 +88,45 @@ img {
     
 }
 
+/*carrousel*/
+.carousel-item {
+    width: 100vw;
+    height: 500px;
+    max-height: 500px;
+    min-height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/*fincarrousel*/
 
 
 
+/*separador*/
+.titulo-seccion {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 10px 0;
+    margin-top: 0px;
+}
 
+.titulo-seccion h1{
+    font-family: 'Lato', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
 
-
+    color: #333;    
+}
 /* main */
 
 
@@ -115,13 +146,12 @@ img {
     background: #fff;
     padding: 0px;
     transition: box-shadow 0.3s;
-    
-
-    
+    position: relative;
+    overflow: hidden;
 }
 
 .item h2    {
-    font-family: 'lato', 'lexend', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-size: 1.2rem;
     text-align: center;
     padding: 10px 0;
@@ -144,17 +174,19 @@ img {
 }
 
 .item:hover {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.70)   ;
-    }
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.70);
+}
+
+
 
 
 .info-producto{
-    font-family: 'lato', 'lexend';
+    font-family: 'Lato';
 }
 
 /* Categorías */
 .categoriatitle {
-    font-family: 'lexend', 'lato', sans-serif;
+    font-family: 'Lato', sans-serif;
     text-align: center;
     font-size: 2rem;
     margin: 20px 0;
@@ -164,7 +196,7 @@ img {
 .info-producto-videojuego {
     padding: 10px;
     text-align: center;
-    font-family: 'lato', 'lexend', sans-serif;
+    font-family: 'Lato', sans-serif;
     
 }
 
@@ -177,4 +209,262 @@ img {
     cursor: pointer;
     font-size: 1rem;
     transition: background-color 0.3s;
+}
+
+/* Info overlay para hover */
+.item .info-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 15px;
+}
+
+.item:hover .info-overlay {
+    opacity: 1;
+}
+
+.info-overlay h3 {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.2rem;
+    margin: 0 0 8px 0;
+    color: #fff;
+}
+
+.info-overlay .year {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: #ccc;
+    margin: 0 0 8px 0;
+}
+
+.info-overlay .genre {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.85rem;
+    color: #f0f0f0;
+    margin: 0 0 8px 0;
+}
+
+.info-overlay .rating {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem;
+    color: #ffd700;
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Estilos para la página de registro */
+.form-control {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* Estilo para el campo de archivo de foto */
+.photo-upload-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.photo-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.photo-upload-label:hover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+    color: #007bff;
+}
+
+.photo-upload-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.photo-preview {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 2px solid #dee2e6;
+}
+
+/* Authentication and Profile Styles */
+
+/* Profile photo styles for profile page */
+.profile-photo-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-photo-container:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.profile-photo-container:hover .photo-overlay {
+    opacity: 1;
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-icon {
+    color: white;
+    font-size: 2rem;
+}
+
+.profile-photo-container.drag-over {
+    border: 3px dashed #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Login form styles */
+.input-group .btn {
+    border-left: none;
+}
+
+.input-group .form-control:focus + .btn {
+    border-color: #007bff;
+}
+
+/* Recovery form styles */
+#recoveryCode {
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    font-size: 1.5rem;
+    letter-spacing: 0.3rem;
+}
+
+/* Profile page specific styles */
+.border-top {
+    border-color: #dee2e6 !important;
+}
+
+.genre-checkbox:checked + label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Enhanced button styles */
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+/* Alert animations */
+.alert {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
