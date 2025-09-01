@@ -468,3 +468,21 @@ img {
         opacity: 1;
     }
 }
+
+/* Evita que el dropdown se salga de la pantalla y mejora la legibilidad */
+.navbar .dropdown-menu {
+    max-width: 90vw;
+    min-width: 200px;
+    word-break: break-word;
+    white-space: normal;
+    right: 0;
+    left: auto;
+}
+
+@media (max-width: 576px) {
+  .navbar .dropdown-menu {
+    min-width: 150px;
+    font-size: 0.95rem;
+    padding: 8px 0;
+  }
+}
