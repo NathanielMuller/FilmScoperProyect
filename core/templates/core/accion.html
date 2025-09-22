@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FilmScoper - Películas de Acción{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header>
+    <div class="filmscoper-icon">
+        <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
+    </div>
+    <h1>Películas de Acción</h1>
+</header>
+
+<!-- Grid de películas de acción -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="{% url 'core:pelicula' %}?movie=skyfall">
+                    <div class="item">
+                        <img src="{% static 'core/img/accion/007-skyfall.webp' %}" alt="007 Skyfall">
+                        <div class="info-overlay">
+                            <h3>007: Skyfall</h3>
+                            <p class="year">2012</p>
+                            <p class="genre">Acción</p>
+                            <p class="rating">★★★★☆ 8.1</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="{% url 'core:pelicula' %}?movie=caballero-oscuro">
+                    <div class="item">
+                        <img src="{% static 'core/img/accion/el-caballero-oscuro.webp' %}" alt="El Caballero Oscuro">
+                        <div class="info-overlay">
+                            <h3>El Caballero Oscuro</h3>
+                            <p class="year">2008</p>
+                            <p class="genre">Acción</p>
+                            <p class="rating">★★★★★ 9.0</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="{% url 'core:pelicula' %}?movie=gladiador">
+                    <div class="item">
+                        <img src="{% static 'core/img/accion/gladiador.webp' %}" alt="Gladiador">
+                        <div class="info-overlay">
+                            <h3>Gladiador</h3>
+                            <p class="year">2000</p>
+                            <p class="genre">Acción</p>
+                            <p class="rating">★★★★☆ 8.5</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="{% url 'core:pelicula' %}?movie=mad-max">
+                    <div class="item">
+                        <img src="{% static 'core/img/accion/mad-max.webp' %}" alt="Mad Max">
+                        <div class="info-overlay">
+                            <h3>Mad Max: Fury Road</h3>
+                            <p class="year">2015</p>
+                            <p class="genre">Acción</p>
+                            <p class="rating">★★★★☆ 8.1</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+            <div class="item-container">
+                <a href="{% url 'core:pelicula' %}?movie=vengadores">
+                    <div class="item">
+                        <img src="{% static 'core/img/accion/vengadores-endgame.webp' %}" alt="Vengadores Endgame">
+                        <div class="info-overlay">
+                            <h3>Vengadores: Endgame</h3>
+                            <p class="year">2019</p>
+                            <p class="genre">Acción</p>
+                            <p class="rating">★★★★☆ 8.4</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
