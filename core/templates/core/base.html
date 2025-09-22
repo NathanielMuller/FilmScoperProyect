@@ -34,21 +34,12 @@
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'index' %}disabled{% endif %}" href="{% url 'core:index' %}">Inicio</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'accion' %}disabled{% endif %}" href="{% url 'core:accion' %}">Acción</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'comedia' %}disabled{% endif %}" href="{% url 'core:comedia' %}">Comedia</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'documentales' %}disabled{% endif %}" href="{% url 'core:documentales' %}">Documental</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'romantica' %}disabled{% endif %}" href="{% url 'core:romantica' %}">Romance</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'terror' %}disabled{% endif %}" href="{% url 'core:terror' %}">Terror</a>
-                    </li>
+                    {% for categoria in categorias_nav %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.kwargs.categoria_slug == categoria.slug or request.resolver_match.url_name == categoria.slug %}disabled{% endif %}" 
+                               href="{% url 'core:categoria' categoria.slug %}">{{ categoria.nombre }}</a>
+                        </li>
+                    {% endfor %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {% if user.is_authenticated %}

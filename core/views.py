@@ -13,29 +13,43 @@ def index(request):
     return render(request, 'core/index.html')
 
 
+def categoria(request, categoria_slug):
+    """Vista dinámica para mostrar películas por categoría"""
+    categoria = get_object_or_404(Categoria, slug=categoria_slug)
+    peliculas = Pelicula.objects.filter(categorias=categoria, activa=True).order_by('-fecha_agregada')
+    
+    context = {
+        'categoria': categoria,
+        'peliculas': peliculas
+    }
+    
+    return render(request, 'core/categoria.html', context)
+
+
+# Mantener vistas específicas para compatibilidad con URLs existentes
 def accion(request):
-    """Vista para la categoría de acción"""
-    return render(request, 'core/accion.html')
+    """Vista para la categoría de acción - redirige a vista dinámica"""
+    return categoria(request, 'accion')
 
 
 def comedia(request):
-    """Vista para la categoría de comedia"""
-    return render(request, 'core/comedia.html')
+    """Vista para la categoría de comedia - redirige a vista dinámica"""
+    return categoria(request, 'comedia')
 
 
 def documentales(request):
-    """Vista para la categoría de documentales"""
-    return render(request, 'core/documentales.html')
+    """Vista para la categoría de documentales - redirige a vista dinámica"""
+    return categoria(request, 'documentales')
 
 
 def romantica(request):
-    """Vista para la categoría de romance"""
-    return render(request, 'core/romantica.html')
+    """Vista para la categoría de romance - redirige a vista dinámica"""
+    return categoria(request, 'romantica')
 
 
 def terror(request):
-    """Vista para la categoría de terror"""
-    return render(request, 'core/terror.html')
+    """Vista para la categoría de terror - redirige a vista dinámica"""
+    return categoria(request, 'terror')
 
 
 def iniciar_sesion(request):
@@ -117,7 +131,31 @@ def recuperar_password(request):
 
 def pelicula(request):
     """Vista para detalle de película"""
-    return render(request, 'core/pelicula.html')
+    movie_slug = request.GET.get('movie')
+    if not movie_slug:
+        messages.error(request, 'No se especificó una película.')
+        return redirect('core:index')
+    
+    try:
+        pelicula = Pelicula.objects.get(slug=movie_slug, activa=True)
+        
+        # Obtener películas relacionadas de las mismas categorías
+        categorias_pelicula = pelicula.categorias.all()
+        peliculas_relacionadas = Pelicula.objects.filter(
+            categorias__in=categorias_pelicula,
+            activa=True
+        ).exclude(id=pelicula.id).distinct()[:4]
+        
+        context = {
+            'pelicula': pelicula,
+            'peliculas_relacionadas': peliculas_relacionadas,
+        }
+        
+        return render(request, 'core/pelicula.html', context)
+        
+    except Pelicula.DoesNotExist:
+        messages.error(request, 'La película solicitada no existe.')
+        return redirect('core:index')
 
 
 def cerrar_sesion(request):

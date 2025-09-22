@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FilmScoper - {{ categoria.nombre }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header>
+    <div class="filmscoper-icon">
+        <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
+    </div>
+    <h1>{{ categoria.nombre }}</h1>
+    {% if categoria.descripcion %}
+        <p class="category-description">{{ categoria.descripcion }}</p>
+    {% endif %}
+</header>
+
+<!-- Grid de películas -->
+<div class="container-fluid">
+    <div class="row">
+        {% for pelicula in peliculas %}
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                <div class="item-container">
+                    <a href="{% url 'core:pelicula' %}?movie={{ pelicula.slug }}">
+                        <div class="item">
+                            {% if pelicula.poster %}
+                                <img src="{% static pelicula.poster %}" alt="{{ pelicula.titulo }}">
+                            {% else %}
+                                <div class="no-poster bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                                    <span class="text-white">Sin imagen</span>
+                                </div>
+                            {% endif %}
+                            <div class="info-overlay">
+                                <h3>{{ pelicula.titulo }}</h3>
+                                <p class="year">{{ pelicula.año }}</p>
+                                <p class="genre">{{ categoria.nombre }}</p>
+                                {% if pelicula.calificacion_promedio > 0 %}
+                                    <p class="rating">★★★★☆ {{ pelicula.calificacion_promedio }}/5</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <h3>No hay películas disponibles en esta categoría</h3>
+                <p class="text-muted">Próximamente agregaremos más contenido.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Información adicional de la categoría -->
+{% if categoria.descripcion and peliculas %}
+    <div class="container-fluid mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h4>Sobre {{ categoria.nombre }}</h4>
+                        <p>{{ categoria.descripcion }}</p>
+                        <p class="text-muted">
+                            <strong>{{ peliculas.count }}</strong> película{{ peliculas.count|pluralize }} disponible{{ peliculas.count|pluralize }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<style>
+.category-description {
+    text-align: center;
+    color: #666;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+.no-poster {
+    height: 300px;
+}
+</style>
+{% endblock %}

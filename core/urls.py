@@ -5,11 +5,18 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    
+    # Nueva ruta dinámica para categorías
+    path('categoria/<slug:categoria_slug>/', views.categoria, name='categoria'),
+    
+    # Rutas específicas para compatibilidad
     path('accion/', views.accion, name='accion'),
     path('comedia/', views.comedia, name='comedia'),
     path('documentales/', views.documentales, name='documentales'),
     path('romantica/', views.romantica, name='romantica'),
     path('terror/', views.terror, name='terror'),
+    
+    # Autenticación
     path('iniciar-sesion/', views.iniciar_sesion, name='iniciar_sesion'),
     path('registro/', views.registro, name='registro'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),

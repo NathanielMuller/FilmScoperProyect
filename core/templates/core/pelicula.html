@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}FilmScoper - Película{% endblock %}
+{% block title %}FilmScoper - {{ pelicula.titulo|default:"Película" }}{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -14,80 +14,241 @@
 
 <!-- Contenido de la película -->
 <div class="container mt-5 pt-4">
-    <div class="row">
-        <!-- Imagen de la película -->
-        <div class="col-lg-4 col-md-5 mb-4">
-            <div class="card shadow-lg">
-                <img id="moviePoster" src="" class="card-img-top" alt="Poster de la película" style="height: 600px; object-fit: cover;">
+    {% csrf_token %}
+    {% if pelicula %}
+        <div class="row">
+            <!-- Imagen de la película -->
+            <div class="col-lg-4 col-md-5 mb-4">
+                <div class="card shadow-lg">
+                    {% if pelicula.poster %}
+                        <img src="{% static pelicula.poster %}" class="card-img-top" alt="{{ pelicula.titulo }}" style="height: 600px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 600px;">
+                            <span class="text-white">Sin imagen disponible</span>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
 
-        <!-- Información de la película -->
-        <div class="col-lg-8 col-md-7">
-            <div class="card shadow-lg h-100">
-                <div class="card-body p-5">
-                    <h1 id="movieTitle" class="card-title mb-3" style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;"></h1>
-                    
-                    <div class="row mb-3">
-                        <div class="col-sm-6">
-                            <p><strong>Año:</strong> <span id="movieYear" class="text-muted"></span></p>
+            <!-- Información de la película -->
+            <div class="col-lg-8 col-md-7">
+                <div class="card shadow-lg h-100">
+                    <div class="card-body p-5">
+                        <h1 class="card-title mb-3" style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">{{ pelicula.titulo }}</h1>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <p><strong>Año:</strong> <span class="text-muted">{{ pelicula.año }}</span></p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Duración:</strong> <span class="text-muted">{{ pelicula.duracion }} min</span></p>
+                            </div>
                         </div>
-                        <div class="col-sm-6">
-                            <p><strong>Duración:</strong> <span id="movieDuration" class="text-muted"></span></p>
+
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <p><strong>Categorías:</strong> 
+                                    <span class="text-muted">
+                                        {% for categoria in pelicula.categorias.all %}
+                                            <a href="{% url 'core:categoria' categoria.slug %}" class="text-decoration-none">{{ categoria.nombre }}</a>
+                                            {% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-sm-6">
+                                {% if pelicula.calificacion_promedio > 0 %}
+                                    <p><strong>Rating:</strong> 
+                                        <span class="text-warning fs-5">
+                                            ★ {{ pelicula.calificacion_promedio }}/5
+                                            <small class="text-muted">({{ pelicula.total_calificaciones }} calificacion{{ pelicula.total_calificaciones|pluralize:"es" }})</small>
+                                        </span>
+                                    </p>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-sm-6">
-                            <p><strong>Género:</strong> <span id="movieGenre" class="text-muted"></span></p>
+                        <div class="mb-3">
+                            <p><strong>Director:</strong> <span class="text-muted">{{ pelicula.director }}</span></p>
                         </div>
-                        <div class="col-sm-6">
-                            <p><strong>Rating:</strong> <span id="movieRating" class="text-warning fs-5"></span></p>
+
+                        <div class="mb-4">
+                            <p><strong>Reparto:</strong> <span class="text-muted">{{ pelicula.reparto }}</span></p>
                         </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <p><strong>Director:</strong> <span id="movieDirector" class="text-muted"></span></p>
-                    </div>
+                        <div class="mb-4">
+                            <h4 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Sinopsis</h4>
+                            <p class="text-muted" style="line-height: 1.6; text-align: justify;">{{ pelicula.sinopsis }}</p>
+                        </div>
 
-                    <div class="mb-4">
-                        <p><strong>Reparto:</strong> <span id="movieCast" class="text-muted"></span></p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h4 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Sinopsis</h4>
-                        <p id="movieSynopsis" class="text-muted" style="line-height: 1.6; text-align: justify;"></p>
-                    </div>
-
-                    <!-- Botones de acción -->
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button class="btn btn-primary btn-lg">
-                            <i class="bi bi-play-fill"></i> Ver Trailer
-                        </button>
-                        <button class="btn btn-outline-secondary btn-lg">
-                            <i class="bi bi-heart"></i> Favoritos
-                        </button>
-                        <button class="btn btn-outline-info btn-lg">
-                            <i class="bi bi-share"></i> Compartir
-                        </button>
+                        <!-- Botones de acción -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-lg">
+                                🎬 Ver Trailer
+                            </button>
+                            {% if user.is_authenticated %}
+                                <button class="btn btn-outline-secondary btn-lg" id="btn-favorito" data-pelicula-id="{{ pelicula.id }}">
+                                    ❤️ Favoritos
+                                </button>
+                                <button class="btn btn-outline-info btn-lg" id="btn-ver-mas-tarde" data-pelicula-id="{{ pelicula.id }}">
+                                    🔖 Ver Más Tarde
+                                </button>
+                            {% else %}
+                                <a href="{% url 'core:iniciar_sesion' %}" class="btn btn-outline-secondary btn-lg">
+                                    ❤️ Favoritos
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Películas relacionadas -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h3 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Películas Relacionadas</h3>
-            <div id="relatedMovies" class="row mt-3">
-                <!-- Las películas relacionadas se cargarán dinámicamente -->
+        <!-- Películas relacionadas -->
+        {% if peliculas_relacionadas %}
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h3 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Películas Relacionadas</h3>
+                    <div class="row mt-3">
+                        {% for pelicula_relacionada in peliculas_relacionadas %}
+                            <div class="col-6 col-md-3 mb-3">
+                                <a href="{% url 'core:pelicula' %}?movie={{ pelicula_relacionada.slug }}" class="text-decoration-none">
+                                    <div class="card shadow-sm h-100">
+                                        {% if pelicula_relacionada.poster %}
+                                            <img src="{% static pelicula_relacionada.poster %}" class="card-img-top" alt="{{ pelicula_relacionada.titulo }}" style="height: 300px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                                                <span class="text-white small">Sin imagen</span>
+                                            </div>
+                                        {% endif %}
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title text-dark mb-1" style="font-size: 0.9rem;">{{ pelicula_relacionada.titulo }}</h6>
+                                            <p class="card-text text-muted mb-1" style="font-size: 0.8rem;">{{ pelicula_relacionada.año }}</p>
+                                            {% if pelicula_relacionada.calificacion_promedio > 0 %}
+                                                <p class="card-text text-warning" style="font-size: 0.8rem;">★ {{ pelicula_relacionada.calificacion_promedio }}/5</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Mensaje de error si no hay película -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <h2>Película no encontrada</h2>
+                <p class="text-muted">La película que buscas no existe en nuestra base de datos.</p>
+                <a href="{% url 'core:index' %}" class="btn btn-primary">Volver al inicio</a>
             </div>
         </div>
-    </div>
+    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="{% static 'core/js/pelicula.js' %}" defer></script>
+<script>
+// Funciones para favoritos y ver más tarde
+document.addEventListener('DOMContentLoaded', function() {
+    // Botón de favoritos
+    const btnFavorito = document.getElementById('btn-favorito');
+    if (btnFavorito) {
+        btnFavorito.addEventListener('click', function() {
+            const peliculaId = this.getAttribute('data-pelicula-id');
+            toggleFavorito(peliculaId);
+        });
+    }
+    
+    // Botón de ver más tarde
+    const btnVerMasTarde = document.getElementById('btn-ver-mas-tarde');
+    if (btnVerMasTarde) {
+        btnVerMasTarde.addEventListener('click', function() {
+            const peliculaId = this.getAttribute('data-pelicula-id');
+            toggleVerMasTarde(peliculaId);
+        });
+    }
+});
+
+function toggleFavorito(peliculaId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    
+    if (!csrfToken) {
+        console.error('Token CSRF no encontrado');
+        return;
+    }
+    
+    fetch(`/api/favorito/${peliculaId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Actualizar el botón para mostrar el estado
+            const btn = document.getElementById('btn-favorito');
+            if (data.es_favorito) {
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-secondary');
+                btn.innerHTML = '💖 En Favoritos';
+            } else {
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-outline-secondary');
+                btn.innerHTML = '❤️ Favoritos';
+            }
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo procesar la solicitud'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    });
+}
+
+function toggleVerMasTarde(peliculaId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    
+    if (!csrfToken) {
+        console.error('Token CSRF no encontrado');
+        return;
+    }
+    
+    fetch(`/api/ver-mas-tarde/${peliculaId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Actualizar el botón para mostrar el estado
+            const btn = document.getElementById('btn-ver-mas-tarde');
+            if (data.en_lista) {
+                btn.classList.remove('btn-outline-info');
+                btn.classList.add('btn-info');
+                btn.innerHTML = '✅ En Mi Lista';
+            } else {
+                btn.classList.remove('btn-info');
+                btn.classList.add('btn-outline-info');
+                btn.innerHTML = '🔖 Ver Más Tarde';
+            }
+        } else {
+            alert('Error: ' + (data.message || 'No se pudo procesar la solicitud'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    });
+}
+</script>
 {% endblock %}
