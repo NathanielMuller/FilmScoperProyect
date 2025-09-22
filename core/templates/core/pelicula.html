@@ -4,13 +4,90 @@
 {% block title %}FilmScoper - Película{% endblock %}
 
 {% block content %}
+<!-- Header -->
+<header>
+    <div class="filmscoper-icon">
+        <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
+    </div>
+    <h1>FilmScoper</h1>
+</header>
+
+<!-- Contenido de la película -->
 <div class="container mt-5 pt-4">
     <div class="row">
-        <div class="col-md-8">
-            <h1>Detalle de Película</h1>
-            <p>Esta es una página de ejemplo para mostrar detalles de películas.</p>
-            <p>En el futuro aquí se mostrará información detallada de cada película.</p>
+        <!-- Imagen de la película -->
+        <div class="col-lg-4 col-md-5 mb-4">
+            <div class="card shadow-lg">
+                <img id="moviePoster" src="" class="card-img-top" alt="Poster de la película" style="height: 600px; object-fit: cover;">
+            </div>
+        </div>
+
+        <!-- Información de la película -->
+        <div class="col-lg-8 col-md-7">
+            <div class="card shadow-lg h-100">
+                <div class="card-body p-5">
+                    <h1 id="movieTitle" class="card-title mb-3" style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;"></h1>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <p><strong>Año:</strong> <span id="movieYear" class="text-muted"></span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p><strong>Duración:</strong> <span id="movieDuration" class="text-muted"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <p><strong>Género:</strong> <span id="movieGenre" class="text-muted"></span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p><strong>Rating:</strong> <span id="movieRating" class="text-warning fs-5"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <p><strong>Director:</strong> <span id="movieDirector" class="text-muted"></span></p>
+                    </div>
+
+                    <div class="mb-4">
+                        <p><strong>Reparto:</strong> <span id="movieCast" class="text-muted"></span></p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Sinopsis</h4>
+                        <p id="movieSynopsis" class="text-muted" style="line-height: 1.6; text-align: justify;"></p>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-fill"></i> Ver Trailer
+                        </button>
+                        <button class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-heart"></i> Favoritos
+                        </button>
+                        <button class="btn btn-outline-info btn-lg">
+                            <i class="bi bi-share"></i> Compartir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Películas relacionadas -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">Películas Relacionadas</h3>
+            <div id="relatedMovies" class="row mt-3">
+                <!-- Las películas relacionadas se cargarán dinámicamente -->
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/pelicula.js' %}" defer></script>
 {% endblock %}

@@ -13,5 +13,12 @@ urlpatterns = [
     path('iniciar-sesion/', views.iniciar_sesion, name='iniciar_sesion'),
     path('registro/', views.registro, name='registro'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
+    path('cerrar-sesion/', views.cerrar_sesion, name='cerrar_sesion'),
+    path('perfil/', views.perfil, name='perfil'),
     path('pelicula/', views.pelicula, name='pelicula'),
+    
+    # APIs para funcionalidades AJAX
+    path('api/calificar/<int:pelicula_id>/', views.calificar_pelicula, name='calificar_pelicula'),
+    path('api/favorito/<int:pelicula_id>/', views.toggle_favorito, name='toggle_favorito'),
+    path('api/ver-mas-tarde/<int:pelicula_id>/', views.toggle_ver_mas_tarde, name='toggle_ver_mas_tarde'),
 ]
