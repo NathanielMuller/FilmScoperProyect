@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FilmScoper - Películas de Comedia{% endblock %}
+
+{% block content %}
+<header>
+    <div class="filmscoper-icon">
+        <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
+    </div>
+    <h1>Películas de Comedia</h1>
+</header>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="{% url 'core:pelicula' %}?movie=chicas-malas">
+                <div class="item">
+                    <figure>
+                        <img src="{% static 'core/img/comedia/chicas-malas.webp' %}" alt="Chicas Malas">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Chicas Malas</h3>
+                        <div class="year">2004</div>
+                        <div class="genre">Comedia</div>
+                        <div class="rating">⭐ 7.0/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="{% url 'core:pelicula' %}?movie=gran-hotel-budapest">
+                <div class="item">
+                    <figure>
+                        <img src="{% static 'core/img/comedia/gran-hotel-budapest.webp' %}" alt="Gran Hotel Budapest">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>El Gran Hotel Budapest</h3>
+                        <div class="year">2014</div>
+                        <div class="genre">Comedia</div>
+                        <div class="rating">⭐ 8.1/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="{% url 'core:pelicula' %}?movie=donde-estan-las-rubias">
+                <div class="item">
+                    <figure>
+                        <img src="{% static 'core/img/comedia/donde-estan-las-rubias.webp' %}" alt="¿Dónde están las rubias?">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>¿Dónde están las rubias?</h3>
+                        <div class="year">2004</div>
+                        <div class="genre">Comedia</div>
+                        <div class="rating">⭐ 5.8/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="{% url 'core:pelicula' %}?movie=supercool">
+                <div class="item">
+                    <figure>
+                        <img src="{% static 'core/img/comedia/supercool.webp' %}" alt="Superbad">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Superbad</h3>
+                        <div class="year">2007</div>
+                        <div class="genre">Comedia</div>
+                        <div class="rating">⭐ 7.6/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+            <a href="{% url 'core:pelicula' %}?movie=zoolander">
+                <div class="item">
+                    <figure>
+                        <img src="{% static 'core/img/comedia/zoolander.webp' %}" alt="Zoolander">
+                    </figure>
+                    <div class="info-overlay">
+                        <h3>Zoolander</h3>
+                        <div class="year">2001</div>
+                        <div class="genre">Comedia</div>
+                        <div class="rating">⭐ 6.5/10</div>
+                    </div>
+                </div>
+            </a>    
+        </div>
+    </div>
+</div>
+{% endblock %}
