@@ -24,8 +24,16 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('pelicula/', views.pelicula, name='pelicula'),
     
+    # Listas personales
+    path('mis-favoritos/', views.mis_favoritos, name='mis_favoritos'),
+    path('ver-mas-tarde/', views.ver_mas_tarde_lista, name='ver_mas_tarde_lista'),
+    
     # APIs para funcionalidades AJAX
     path('api/calificar/<int:pelicula_id>/', views.calificar_pelicula, name='calificar_pelicula'),
     path('api/favorito/<int:pelicula_id>/', views.toggle_favorito, name='toggle_favorito'),
     path('api/ver-mas-tarde/<int:pelicula_id>/', views.toggle_ver_mas_tarde, name='toggle_ver_mas_tarde'),
+    
+    # Nuevas APIs para listas personales
+    path('toggle-favorito/<int:pelicula_id>/', views.toggle_favorito, name='toggle_favorito_nuevo'),
+    path('toggle-ver-mas-tarde-nuevo/<int:pelicula_id>/', views.toggle_ver_mas_tarde_nuevo, name='toggle_ver_mas_tarde_nuevo'),
 ]

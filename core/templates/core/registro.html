@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load static %}
+{% load static crispy_forms_tags %}
 
 {% block title %}FilmScoper - Registro{% endblock %}
 
@@ -16,109 +16,100 @@
 <main class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
-            <form id="formRegister" action="#" method="post" class="card p-4 shadow-sm" novalidate>
+            <form id="formRegister" method="post" enctype="multipart/form-data" class="card p-4 shadow-sm">
                 {% csrf_token %}
                 <div class="row g-3">
                     
-                    <!-- Nombre completo -->
+                    <!-- Nombre -->
                     <div class="col-md-6">
-                        <label for="regName" class="form-label">Nombre completo</label>
-                        <input type="text" id="regName" name="fullname" class="form-control"
-                               placeholder="Ej: Ana Pérez" required minlength="2" autocomplete="name">
-                        <div class="invalid-feedback">Ingresa tu nombre (mínimo 2 caracteres).</div>
+                        <label for="{{ form.first_name.id_for_label }}" class="form-label">Nombre</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger">{{ form.first_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Apellido -->
+                    <div class="col-md-6">
+                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Apellido</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger">{{ form.last_name.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Usuario -->
                     <div class="col-md-6">
-                        <label for="regUsername" class="form-label">Nombre de usuario</label>
-                        <input type="text" id="regUsername" name="username" class="form-control"
-                               placeholder="Ej: anaperez" required minlength="3" autocomplete="username">
-                        <div class="invalid-feedback">Ingresa un nombre de usuario (mínimo 3 caracteres).</div>
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Nombre de usuario</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="text-danger">{{ form.username.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Email -->
                     <div class="col-md-6">
-                        <label for="regEmail" class="form-label">Correo electrónico</label>
-                        <input type="email" id="regEmail" name="email" class="form-control"
-                               placeholder="ejemplo@mail.com" required autocomplete="email">
-                        <div class="invalid-feedback">Ingresa un correo válido.</div>
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Correo electrónico</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger">{{ form.email.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Fecha nacimiento -->
                     <div class="col-md-6">
-                        <label for="regBirthdate" class="form-label">Fecha de nacimiento</label>
-                        <input type="date" id="regBirthdate" name="birthdate" class="form-control" required autocomplete="bday">
-                        <div class="invalid-feedback">Debes tener al menos 13 años.</div>
+                        <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">Fecha de nacimiento</label>
+                        {{ form.fecha_nacimiento }}
+                        {% if form.fecha_nacimiento.errors %}
+                            <div class="text-danger">{{ form.fecha_nacimiento.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
-                    <!-- Password -->
+                    <!-- Contraseña -->
                     <div class="col-md-6">
-                        <label for="regPassword" class="form-label">Contraseña</label>
-                        <input type="password" id="regPassword" name="password" class="form-control"
-                               placeholder="Mínimo 6 caracteres" required minlength="6" maxlength="18" autocomplete="new-password">
-                        <div class="invalid-feedback">Debe tener al menos 6 caracteres.</div>
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">Contraseña</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="text-danger">{{ form.password1.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
-                    <!-- Confirmar -->
+                    <!-- Confirmar contraseña -->
                     <div class="col-md-6">
-                        <label for="regConfirm" class="form-label">Confirmar contraseña</label>
-                        <input type="password" id="regConfirm" name="confirm" class="form-control"
-                               placeholder="Repite tu contraseña" required minlength="6" maxlength="18" autocomplete="new-password">
-                        <div class="invalid-feedback">Las contraseñas deben coincidir.</div>
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">Confirmar contraseña</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="text-danger">{{ form.password2.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Foto de perfil -->
-                    <div class="col-12">
-                        <label class="form-label">Foto de perfil (opcional)</label>
-                        <div class="photo-upload-container">
-                            <label for="regPhoto" class="photo-upload-label">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                                </svg>
-                                <span id="photoLabel">Seleccionar imagen</span>
-                            </label>
-                            <input type="file" id="regPhoto" name="photo" class="photo-upload-input" 
-                                   accept="image/*" onchange="previewPhoto(this)">
-                            <div id="photoPreview" class="mt-2"></div>
-                        </div>
-                        <div class="form-text">Formatos aceptados: JPG, PNG, GIF (máx. 5MB)</div>
+                    <div class="col-md-6">
+                        <label for="{{ form.foto_perfil.id_for_label }}" class="form-label">Foto de perfil (opcional)</label>
+                        {{ form.foto_perfil }}
+                        {% if form.foto_perfil.errors %}
+                            <div class="text-danger">{{ form.foto_perfil.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Géneros favoritos -->
                     <div class="col-12">
-                        <label class="form-label">Géneros de películas favoritos</label>
+                        <label class="form-label">Géneros favoritos (opcional)</label>
                         <div class="row">
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="accion" id="genreAction">
-                                    <label class="form-check-label" for="genreAction">Acción</label>
+                            {% for choice in form.generos_favoritos %}
+                                <div class="col-md-2 col-sm-4 col-6">
+                                    <div class="form-check">
+                                        {{ choice.tag }}
+                                        <label class="form-check-label" for="{{ choice.choice_label }}">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="comedia" id="genreComedy">
-                                    <label class="form-check-label" for="genreComedy">Comedia</label>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="documentales" id="genreDocumentary">
-                                    <label class="form-check-label" for="genreDocumentary">Documental</label>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="romantica" id="genreRomance">
-                                    <label class="form-check-label" for="genreRomance">Romance</label>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="terror" id="genreHorror">
-                                    <label class="form-check-label" for="genreHorror">Terror</label>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
+                        {% if form.generos_favoritos.errors %}
+                            <div class="text-danger">{{ form.generos_favoritos.errors.0 }}</div>
+                        {% endif %}
                     </div>
 
                 </div>

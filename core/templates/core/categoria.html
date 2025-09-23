@@ -10,9 +10,6 @@
         <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
     </div>
     <h1>{{ categoria.nombre }}</h1>
-    {% if categoria.descripcion %}
-        <p class="category-description">{{ categoria.descripcion }}</p>
-    {% endif %}
 </header>
 
 <!-- Grid de películas -->
@@ -49,6 +46,55 @@
             </div>
         {% endfor %}
     </div>
+    
+    <!-- Paginación -->
+    {% if is_paginated %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="Primera">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
 <!-- Información adicional de la categoría -->
@@ -61,7 +107,10 @@
                         <h4>Sobre {{ categoria.nombre }}</h4>
                         <p>{{ categoria.descripcion }}</p>
                         <p class="text-muted">
-                            <strong>{{ peliculas.count }}</strong> película{{ peliculas.count|pluralize }} disponible{{ peliculas.count|pluralize }}
+                            <strong>{{ page_obj.paginator.count }}</strong> película{{ page_obj.paginator.count|pluralize }} disponible{{ page_obj.paginator.count|pluralize }}
+                            {% if is_paginated %}
+                                - Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            {% endif %}
                         </p>
                     </div>
                 </div>

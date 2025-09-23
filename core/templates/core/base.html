@@ -16,6 +16,9 @@
           integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" 
           crossorigin="anonymous">
     
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
     
@@ -51,8 +54,12 @@
                         <ul class="dropdown-menu">
                             {% if user.is_authenticated %}
                                 <li><a class="dropdown-item" href="{% url 'core:perfil' %}">Mi Perfil</a></li>
-                                <li><a class="dropdown-item" href="#">Mis Favoritos</a></li>
-                                <li><a class="dropdown-item" href="#">Ver Más Tarde</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:mis_favoritos' %}">
+                                    <i class="fas fa-heart me-2"></i>Mis Favoritos
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:ver_mas_tarde_lista' %}">
+                                    <i class="fas fa-clock me-2"></i>Ver Más Tarde
+                                </a></li>
                                 {% if user.is_staff %}
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="/admin/" target="_blank">
@@ -84,6 +91,63 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" 
             integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" 
             crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom SweetAlert for Django Messages -->
+    <script>
+        // Mostrar mensajes de Django con SweetAlert
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: '{{ message|escapejs }}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                {% elif message.tags == 'error' %}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ message|escapejs }}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
+                {% elif message.tags == 'warning' %}
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atención',
+                        text: '{{ message|escapejs }}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                {% else %}
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Información',
+                        text: '{{ message|escapejs }}',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </script>
     
     <!-- Custom navbar functionality -->
     <script src="{% static 'core/js/navbar.js' %}"></script>

@@ -86,6 +86,10 @@ class PerfilUsuario(models.Model):
     # Géneros favoritos
     generos_favoritos = models.ManyToManyField(Categoria, blank=True, related_name='usuarios_favoritos')
     
+    # Películas favoritas y para ver más tarde
+    peliculas_favoritas = models.ManyToManyField(Pelicula, blank=True, related_name='usuarios_favoritas')
+    ver_mas_tarde = models.ManyToManyField(Pelicula, blank=True, related_name='usuarios_ver_mas_tarde')
+    
     # Configuraciones
     recibir_notificaciones = models.BooleanField(default=True)
     perfil_publico = models.BooleanField(default=True)

@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from .forms import RegistroForm, LoginForm, ReseñaForm, PerfilForm
 from .models import Pelicula, Categoria, Reseña, PerfilUsuario
@@ -14,13 +15,28 @@ def index(request):
 
 
 def categoria(request, categoria_slug):
-    """Vista dinámica para mostrar películas por categoría"""
+    """Vista dinámica para mostrar películas por categoría con paginación"""
     categoria = get_object_or_404(Categoria, slug=categoria_slug)
-    peliculas = Pelicula.objects.filter(categorias=categoria, activa=True).order_by('-fecha_agregada')
+    peliculas_list = Pelicula.objects.filter(categorias=categoria, activa=True).order_by('-fecha_agregada')
+    
+    # Configurar paginación
+    paginator = Paginator(peliculas_list, 12)  # 12 películas por página
+    page = request.GET.get('page', 1)
+    
+    try:
+        peliculas = paginator.page(page)
+    except PageNotAnInteger:
+        # Si la página no es un entero, mostrar la primera página
+        peliculas = paginator.page(1)
+    except EmptyPage:
+        # Si la página está fuera de rango, mostrar la última página
+        peliculas = paginator.page(paginator.num_pages)
     
     context = {
         'categoria': categoria,
-        'peliculas': peliculas
+        'peliculas': peliculas,
+        'is_paginated': peliculas.has_other_pages(),
+        'page_obj': peliculas,
     }
     
     return render(request, 'core/categoria.html', context)
@@ -104,19 +120,33 @@ def registro(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST, request.FILES)
         if form.is_valid():
-            user = form.save()
-            
-            # Autenticar automáticamente después del registro
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
-            
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'¡Cuenta creada exitosamente! Bienvenido, {user.first_name}!')
-                return redirect('core:index')
+            try:
+                # Guardar el usuario
+                user = form.save()
+                
+                # Obtener las credenciales para login automático
+                username = form.cleaned_data.get('username')
+                raw_password = form.cleaned_data.get('password1')
+                
+                # Autenticar y loguear automáticamente
+                authenticated_user = authenticate(request, username=username, password=raw_password)
+                
+                if authenticated_user is not None:
+                    login(request, authenticated_user)
+                    messages.success(request, f'¡Cuenta creada exitosamente! Bienvenido, {authenticated_user.first_name}!')
+                    return redirect('core:index')
+                else:
+                    # Si falla el login automático, mostrar mensaje de éxito pero pedir login manual
+                    messages.success(request, 'Cuenta creada exitosamente. Por favor, inicia sesión con tus credenciales.')
+                    return redirect('core:iniciar_sesion')
+                    
+            except Exception as e:
+                messages.error(request, f'Error al crear la cuenta: {str(e)}')
         else:
-            messages.error(request, 'Por favor corrige los errores en el formulario.')
+            # Mostrar errores específicos del formulario
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
     else:
         form = RegistroForm()
     
@@ -272,5 +302,151 @@ def toggle_ver_mas_tarde(request, pelicula_id):
             'en_lista': en_lista,
             'message': mensaje
         })
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
+@login_required
+def mis_favoritos(request):
+    """Vista para mostrar las películas favoritas del usuario"""
+    try:
+        perfil = request.user.perfil
+        peliculas_favoritas = perfil.peliculas_favoritas.filter(activa=True).order_by('-fecha_agregada')
+        
+        # Configurar paginación
+        paginator = Paginator(peliculas_favoritas, 12)  # 12 películas por página
+        page = request.GET.get('page', 1)
+        
+        try:
+            peliculas = paginator.page(page)
+        except PageNotAnInteger:
+            peliculas = paginator.page(1)
+        except EmptyPage:
+            peliculas = paginator.page(paginator.num_pages)
+        
+        context = {
+            'titulo': 'Mis Favoritos',
+            'descripcion': 'Películas que has marcado como favoritas',
+            'peliculas': peliculas,
+            'is_paginated': peliculas.has_other_pages(),
+            'page_obj': peliculas,
+            'tipo_lista': 'favoritos'
+        }
+        
+        return render(request, 'core/lista_personal.html', context)
+    
+    except PerfilUsuario.DoesNotExist:
+        messages.error(request, 'No se encontró tu perfil de usuario.')
+        return redirect('core:index')
+
+
+@login_required
+def ver_mas_tarde_lista(request):
+    """Vista para mostrar las películas marcadas para ver más tarde"""
+    try:
+        perfil = request.user.perfil
+        peliculas_ver_mas_tarde = perfil.ver_mas_tarde.filter(activa=True).order_by('-fecha_agregada')
+        
+        # Configurar paginación
+        paginator = Paginator(peliculas_ver_mas_tarde, 12)  # 12 películas por página
+        page = request.GET.get('page', 1)
+        
+        try:
+            peliculas = paginator.page(page)
+        except PageNotAnInteger:
+            peliculas = paginator.page(1)
+        except EmptyPage:
+            peliculas = paginator.page(paginator.num_pages)
+        
+        context = {
+            'titulo': 'Ver Más Tarde',
+            'descripcion': 'Películas que has guardado para ver más tarde',
+            'peliculas': peliculas,
+            'is_paginated': peliculas.has_other_pages(),
+            'page_obj': peliculas,
+            'tipo_lista': 'ver_mas_tarde'
+        }
+        
+        return render(request, 'core/lista_personal.html', context)
+    
+    except PerfilUsuario.DoesNotExist:
+        messages.error(request, 'No se encontró tu perfil de usuario.')
+        return redirect('core:index')
+
+
+@login_required
+def toggle_favorito(request, pelicula_id):
+    """Vista AJAX para agregar/quitar película de favoritos"""
+    if request.method == 'POST':
+        try:
+            pelicula = get_object_or_404(Pelicula, id=pelicula_id)
+            perfil = request.user.perfil
+            
+            if pelicula in perfil.peliculas_favoritas.all():
+                # Quitar de favoritos
+                perfil.peliculas_favoritas.remove(pelicula)
+                es_favorito = False
+                mensaje = f'"{pelicula.titulo}" eliminada de favoritos'
+            else:
+                # Agregar a favoritos
+                perfil.peliculas_favoritas.add(pelicula)
+                es_favorito = True
+                mensaje = f'"{pelicula.titulo}" agregada a favoritos'
+            
+            return JsonResponse({
+                'success': True,
+                'es_favorito': es_favorito,
+                'message': mensaje
+            })
+            
+        except PerfilUsuario.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró tu perfil de usuario'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error al procesar la solicitud'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
+@login_required
+def toggle_ver_mas_tarde_nuevo(request, pelicula_id):
+    """Vista AJAX para agregar/quitar película de ver más tarde"""
+    if request.method == 'POST':
+        try:
+            pelicula = get_object_or_404(Pelicula, id=pelicula_id)
+            perfil = request.user.perfil
+            
+            if pelicula in perfil.ver_mas_tarde.all():
+                # Quitar de ver más tarde
+                perfil.ver_mas_tarde.remove(pelicula)
+                en_lista = False
+                mensaje = f'"{pelicula.titulo}" eliminada de "Ver más tarde"'
+            else:
+                # Agregar a ver más tarde
+                perfil.ver_mas_tarde.add(pelicula)
+                en_lista = True
+                mensaje = f'"{pelicula.titulo}" agregada a "Ver más tarde"'
+            
+            return JsonResponse({
+                'success': True,
+                'en_lista': en_lista,
+                'message': mensaje
+            })
+            
+        except PerfilUsuario.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró tu perfil de usuario'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error al procesar la solicitud'
+            })
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'})

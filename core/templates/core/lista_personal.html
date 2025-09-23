@@ -1,0 +1,243 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FilmScoper - {{ titulo }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header>
+    <div class="filmscoper-icon">
+        <img src="{% static 'core/img/icons/filmscoperlogo.svg' %}" alt="FilmScoper Logo">
+    </div>
+    <h1>{{ titulo }}</h1>
+</header>
+
+<!-- Grid de películas -->
+<div class="container-fluid">
+    <div class="row">
+        {% for pelicula in peliculas %}
+            <div class="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
+                <div class="item-container">
+                    <a href="{% url 'core:pelicula' %}?movie={{ pelicula.slug }}">
+                        <div class="item">
+                            {% if pelicula.poster %}
+                                <img src="{% static pelicula.poster %}" alt="{{ pelicula.titulo }}">
+                            {% else %}
+                                <div class="no-poster bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                                    <span class="text-white">Sin imagen</span>
+                                </div>
+                            {% endif %}
+                            <div class="info-overlay">
+                                <h3>{{ pelicula.titulo }}</h3>
+                                <p class="year">{{ pelicula.año }}</p>
+                                <p class="genre">
+                                    {% for categoria in pelicula.categorias.all %}
+                                        {{ categoria.nombre }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                                {% if pelicula.calificacion_promedio > 0 %}
+                                    <p class="rating">★★★★☆ {{ pelicula.calificacion_promedio }}/5</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <!-- Botón para quitar de la lista -->
+                    <div class="action-buttons mt-2">
+                        {% if tipo_lista == 'favoritos' %}
+                            <button class="btn btn-sm btn-outline-danger remove-from-list" 
+                                    data-pelicula-id="{{ pelicula.id }}" 
+                                    data-action="favorito">
+                                <i class="fas fa-heart-broken"></i> Quitar de favoritos
+                            </button>
+                        {% elif tipo_lista == 'ver_mas_tarde' %}
+                            <button class="btn btn-sm btn-outline-warning remove-from-list" 
+                                    data-pelicula-id="{{ pelicula.id }}" 
+                                    data-action="ver_mas_tarde">
+                                <i class="fas fa-clock"></i> Quitar de ver más tarde
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                {% if tipo_lista == 'favoritos' %}
+                    <h3>No tienes películas favoritas</h3>
+                    <p class="text-muted">Agrega películas a tus favoritos para verlas aquí.</p>
+                {% elif tipo_lista == 'ver_mas_tarde' %}
+                    <h3>No tienes películas para ver más tarde</h3>
+                    <p class="text-muted">Guarda películas para ver más tarde y aparecerán aquí.</p>
+                {% endif %}
+                <a href="{% url 'core:index' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-film"></i> Explorar películas
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+        <nav aria-label="Paginación de películas" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- Página anterior -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="Primera">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;&laquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                {% endif %}
+
+                <!-- Números de página -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Página siguiente -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;&raquo;</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// JavaScript para manejar quitar películas de las listas
+document.addEventListener('DOMContentLoaded', function() {
+    const removeButtons = document.querySelectorAll('.remove-from-list');
+    
+    removeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const peliculaId = this.dataset.peliculaId;
+            const action = this.dataset.action;
+            const container = this.closest('.item-container');
+            
+            // Determinar la URL según la acción
+            let url;
+            if (action === 'favorito') {
+                url = `/toggle-favorito/${peliculaId}/`;
+            } else if (action === 'ver_mas_tarde') {
+                url = `/toggle-ver-mas-tarde-nuevo/${peliculaId}/`;
+            }
+            
+            // Realizar petición AJAX
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje con SweetAlert
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Actualizado!',
+                        text: data.message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    
+                    // Remover el elemento de la página con animación
+                    container.style.transition = 'opacity 0.3s ease';
+                    container.style.opacity = '0';
+                    setTimeout(() => {
+                        container.remove();
+                        
+                        // Si no quedan más películas, recargar la página para mostrar el mensaje de lista vacía
+                        if (document.querySelectorAll('.item-container').length === 0) {
+                            setTimeout(() => location.reload(), 500);
+                        }
+                    }, 300);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Error al procesar la solicitud',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000
+                });
+            });
+        });
+    });
+});
+
+// Función auxiliar para obtener el token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}
