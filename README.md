@@ -1,5 +1,29 @@
 # FilmScoper 🎬
 
+## 🔑 Usuarios de Prueba Disponibles
+
+### Para Evaluación y Testing
+El proyecto incluye usuarios pre-configurados para facilitar la evaluación:
+
+| Usuario | Email | Tipo | Contraseña | Descripción |
+|---------|-------|------|------------|-------------|
+| `admin` | admin@filmscoper.com | **Administrador** | Adminx123. | Acceso completo al panel admin `/admin/` |
+| `User1` | Emailejemplo@filmscoper.com | Usuario normal | Prueba123x. | Usuario estándar con datos de prueba |
+
+### 🎯 Accesos Rápidos
+- **Panel de Administración**: http://127.0.0.1:8000/admin/
+- **Aplicación Principal**: http://127.0.0.1:8000/
+- **Categorías**: Cada categoría tiene películas pre-cargadas
+- **Listas Personales**: Los usuarios tienen favoritos y listas configuradas
+
+### 📝 Datos de Prueba Incluidos
+- ✅ **29 películas** distribuidas en 5 categorías
+- ✅ **Usuarios con perfiles** completos y géneros favoritos
+- ✅ **Listas personalizadas** con películas agregadas
+- ✅ **Imágenes y contenido** listo para usar
+
+---
+
 ## Descripción
 
 FilmScoper es una plataforma web moderna desarrollada con Django que permite a los usuarios descubrir, explorar y calificar películas. El proyecto integra funcionalidades avanzadas de gestión de usuarios, sistema de reseñas, categorización de películas y una interfaz de usuario elegante con Bootstrap 5.
