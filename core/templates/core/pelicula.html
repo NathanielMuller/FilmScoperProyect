@@ -57,13 +57,35 @@
                                 </p>
                             </div>
                             <div class="col-sm-6">
-                                {% if pelicula.calificacion_promedio > 0 %}
-                                    <p><strong>Rating:</strong> 
-                                        <span class="text-warning fs-5">
-                                            ★ {{ pelicula.calificacion_promedio }}/5
-                                            <small class="text-muted">({{ pelicula.total_calificaciones }} calificacion{{ pelicula.total_calificaciones|pluralize:"es" }})</small>
+                                <p><strong>Calificaciones:</strong></p>
+                                
+                                <!-- Calificación Oficial -->
+                                {% if pelicula.calificacion_oficial > 0 %}
+                                    <div class="mb-2">
+                                        <span class="badge bg-warning text-dark me-2">
+                                            🌟 {{ pelicula.get_calificacion_oficial_display }}
                                         </span>
-                                    </p>
+                                        <small class="text-muted">IMDb/Oficial</small>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Calificación FilmScoper -->
+                                {% if pelicula.calificacion_promedio > 0 %}
+                                    <div class="mb-2">
+                                        <span class="badge bg-info text-white me-2">
+                                            ⭐ {{ pelicula.get_calificacion_filmscoper_display }}
+                                        </span>
+                                        <small class="text-muted">
+                                            FilmScoper ({{ pelicula.total_calificaciones }} calificacion{{ pelicula.total_calificaciones|pluralize:"es" }})
+                                        </small>
+                                    </div>
+                                {% else %}
+                                    <div class="mb-2">
+                                        <span class="badge bg-secondary text-white me-2">
+                                            ⭐ Sin calificar
+                                        </span>
+                                        <small class="text-muted">FilmScoper</small>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -81,22 +103,247 @@
                             <p class="text-muted" style="line-height: 1.6; text-align: justify;">{{ pelicula.sinopsis }}</p>
                         </div>
 
-                        <!-- Botones de acción -->
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button class="btn btn-primary btn-lg">
-                                🎬 Ver Trailer
+                        <!-- Botones de acción compactos -->
+                        <div class="d-flex gap-2 align-items-center flex-wrap mb-3">
+                            <button class="btn btn-primary btn-sm">
+                                🎬 Trailer
                             </button>
                             {% if user.is_authenticated %}
-                                <button class="btn btn-outline-secondary btn-lg" id="btn-favorito" data-pelicula-id="{{ pelicula.id }}">
+                                <button class="btn btn-outline-secondary btn-sm" id="btn-favorito" data-pelicula-id="{{ pelicula.id }}">
                                     ❤️ Favoritos
                                 </button>
-                                <button class="btn btn-outline-info btn-lg" id="btn-ver-mas-tarde" data-pelicula-id="{{ pelicula.id }}">
+                                <button class="btn btn-outline-info btn-sm" id="btn-ver-mas-tarde" data-pelicula-id="{{ pelicula.id }}">
                                     🔖 Ver Más Tarde
                                 </button>
                             {% else %}
-                                <a href="{% url 'core:iniciar_sesion' %}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'core:iniciar_sesion' %}" class="btn btn-outline-secondary btn-sm">
                                     ❤️ Favoritos
                                 </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Sistema de Rating -->
+                        {% if user.is_authenticated %}
+                            <div class="mb-4 p-3 bg-light rounded">
+                                <h6 class="mb-3" style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">
+                                    ⭐ Tu Calificación
+                                </h6>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="star-rating" data-pelicula-id="{{ pelicula.id }}">
+                                        {% for i in "12345" %}
+                                            <span class="star" data-rating="{{ i }}" style="font-size: 1.5rem; cursor: pointer; color: #ddd;">⭐</span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="rating-info">
+                                        {% if resena_usuario %}
+                                            <small class="text-success">Tu puntuación: {{ resena_usuario.calificacion }}/5</small>
+                                        {% else %}
+                                            <small class="text-muted">Haz clic en las estrellas para calificar</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="mb-4 p-3 bg-light rounded text-center">
+                                <p class="mb-2"><a href="{% url 'core:iniciar_sesion' %}" class="text-decoration-none">Inicia sesión</a> para calificar esta película</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Foro de la Película -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-lg">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4" style="color: #333; font-family: 'Lexend', 'Lato', sans-serif;">
+                            � Foro: {{ pelicula.titulo }}
+                        </h3>
+                        
+                        <!-- Sección de Comentarios del Foro -->
+                        <div class="mt-5">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">💬 Comentarios 
+                                    <span class="badge bg-secondary">{{ comentarios.count }}</span>
+                                </h5>
+                                
+                                <!-- Controles de comentarios -->
+                                {% if comentarios %}
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <!-- Botón de colapso/expansión -->
+                                        <button class="btn btn-outline-secondary btn-sm" id="btn-toggle-comentarios" title="Colapsar/Expandir comentarios">
+                                            <span id="toggle-icon">📋</span> <span id="toggle-text">Compactar</span>
+                                        </button>
+                                        
+                                        <!-- Controles de rotación (ocultos inicialmente) -->
+                                        <div class="d-none" id="controles-rotacion">
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-outline-primary btn-sm" id="btn-anterior" title="Comentario anterior">
+                                                    ⬅️
+                                                </button>
+                                                <button class="btn btn-outline-success btn-sm" id="btn-auto-rotate" title="Rotación automática">
+                                                    ▶️
+                                                </button>
+                                                <button class="btn btn-outline-primary btn-sm" id="btn-siguiente" title="Siguiente comentario">
+                                                    ➡️
+                                                </button>
+                                            </div>
+                                            <small class="text-muted ms-2" id="contador-comentarios">1 / {{ comentarios.count }}</small>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Formulario para agregar comentario -->
+                            {% if user.is_authenticated and formulario_comentario %}
+                                <div class="card border-0 shadow-sm mb-4" id="formulario-comentario">
+                                    <div class="card-body">
+                                        {% if comentarios_limite_info.puede_comentar %}
+                                            <form method="post" class="mb-0">
+                                                {% csrf_token %}
+                                                <div class="mb-3">
+                                                    <label for="{{ formulario_comentario.contenido.id_for_label }}" class="form-label fw-bold">
+                                                        Agregar un comentario:
+                                                    </label>
+                                                    {{ formulario_comentario.contenido }}
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="bi bi-send"></i> Publicar Comentario
+                                                    </button>
+                                                    <div class="text-muted small">
+                                                        Comentarios: {{ comentarios_limite_info.comentarios_padre }}/{{ comentarios_limite_info.limite_comentarios_padre }} | 
+                                                        Respuestas: {{ comentarios_limite_info.respuestas }}/{{ comentarios_limite_info.limite_respuestas }}
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        {% else %}
+                                            <div class="alert alert-warning mb-0">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                                Has alcanzado el límite de {{ comentarios_limite_info.limite_comentarios_padre }} comentarios por película. 
+                                                Puedes seguir respondiendo a otros comentarios 
+                                                ({{ comentarios_limite_info.respuestas }}/{{ comentarios_limite_info.limite_respuestas }} respuestas usadas).
+                                            </div>
+                                        {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            {% elif not user.is_authenticated %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    <a href="{% url 'core:iniciar_sesion' %}" class="alert-link">Inicia sesión</a> para agregar comentarios.
+                                </div>
+                            {% endif %}
+
+                            <!-- Lista de Comentarios -->
+                            {% if comentarios %}
+                                <div class="comentarios-lista">
+                                    {% for comentario in comentarios %}
+                                        <div class="card mb-3 border-0 shadow-sm comentario-item" 
+                                             data-comentario-index="{{ forloop.counter0 }}" 
+                                             id="comentario-{{ forloop.counter0 }}">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div class="d-flex align-items-center w-100">
+                                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                             style="width: 40px; height: 40px;">
+                                                            <span class="text-white fw-bold">
+                                                                {{ comentario.usuario.first_name|first|upper|default:comentario.usuario.username|first|upper }}
+                                                            </span>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <h6 class="mb-0 fw-bold">
+                                                                        {{ comentario.usuario.first_name|default:comentario.usuario.username }}
+                                                                    </h6>
+                                                                    <small class="text-muted">{{ comentario.fecha_creacion|date:"d/m/Y H:i" }}</small>
+                                                                </div>
+                                                                <!-- Rating del usuario en el comentario -->
+                                                                <div class="rating-usuario">
+                                                                    {% if comentario.usuario_rating %}
+                                                                        <span class="text-muted small me-2">Rating:</span>
+                                                                        <div class="d-inline-block">
+                                                                            {% for i in "12345" %}
+                                                                                {% if forloop.counter <= comentario.usuario_rating %}
+                                                                                    <span class="text-warning" style="font-size: 0.9rem;">★</span>
+                                                                                {% else %}
+                                                                                    <span class="text-muted" style="font-size: 0.9rem;">☆</span>
+                                                                                {% endif %}
+                                                                            {% endfor %}
+                                                                            <span class="text-muted small ms-1">({{ comentario.usuario_rating }}/5)</span>
+                                                                        </div>
+                                                                    {% else %}
+                                                                        <span class="text-muted small">Sin calificación</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <p class="mb-2">{{ comentario.contenido|linebreaksbr }}</p>
+                                                
+                                                <!-- Botón de responder -->
+                                                {% if user.is_authenticated and comentarios_limite_info.puede_responder %}
+                                                    <button class="btn btn-outline-secondary btn-sm mb-2" 
+                                                            onclick="toggleFormularioRespuesta({{ comentario.id }})">
+                                                        💬 Responder
+                                                    </button>
+                                                    
+                                                    <!-- Formulario de respuesta (oculto por defecto) -->
+                                                    <div class="d-none mt-2" id="form-respuesta-{{ comentario.id }}">
+                                                        <form method="post">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="respuesta_a" value="{{ comentario.id }}">
+                                                            <div class="mb-2">
+                                                                <textarea 
+                                                                    name="contenido"
+                                                                    class="form-control form-control-sm"
+                                                                    rows="2"
+                                                                    placeholder="Escribe tu respuesta..."
+                                                                    required
+                                                                ></textarea>
+                                                            </div>
+                                                            <div class="d-flex gap-2">
+                                                                <button type="submit" class="btn btn-primary btn-sm">Responder</button>
+                                                                <button type="button" class="btn btn-secondary btn-sm" 
+                                                                        onclick="toggleFormularioRespuesta({{ comentario.id }})">Cancelar</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                {% endif %}
+                                                
+                                                <!-- Respuestas anidadas (si las hay) -->
+                                                {% if comentario.respuestas.all %}
+                                                    <div class="ms-4 mt-3">
+                                                        {% for respuesta in comentario.respuestas.all %}
+                                                            <div class="card border-start border-4 border-primary bg-light mb-2">
+                                                                <div class="card-body py-2 px-3">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                        <small class="fw-bold text-primary">
+                                                                            {{ respuesta.usuario.first_name|default:respuesta.usuario.username }}
+                                                                        </small>
+                                                                        <small class="text-muted">{{ respuesta.fecha_creacion|date:"d/m H:i" }}</small>
+                                                                    </div>
+                                                                    <p class="mb-0 small">{{ respuesta.contenido|linebreaksbr }}</p>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-chat-dots fs-1"></i>
+                                    <p class="mt-3">No hay comentarios aún.</p>
+                                    <p class="small">¡Sé el primero en comentar sobre esta película!</p>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
@@ -112,7 +359,8 @@
                     <div class="row mt-3">
                         {% for pelicula_relacionada in peliculas_relacionadas %}
                             <div class="col-6 col-md-3 mb-3">
-                                <a href="{% url 'core:pelicula' %}?movie={{ pelicula_relacionada.slug }}" class="text-decoration-none">
+                                {% url 'core:pelicula' as pelicula_url %}
+                                <a href="{{ pelicula_url }}?movie={{ pelicula_relacionada.slug }}" class="text-decoration-none">
                                     <div class="card shadow-sm h-100">
                                         {% if pelicula_relacionada.poster %}
                                             <img src="{% static pelicula_relacionada.poster %}" class="card-img-top" alt="{{ pelicula_relacionada.titulo }}" style="height: 300px; object-fit: cover;">
@@ -168,6 +416,238 @@ document.addEventListener('DOMContentLoaded', function() {
             const peliculaId = this.getAttribute('data-pelicula-id');
             toggleVerMasTarde(peliculaId);
         });
+    }
+
+    // Sistema de rating con estrellas
+    const starRating = document.querySelector('.star-rating');
+    if (starRating) {
+        const stars = starRating.querySelectorAll('.star');
+        const peliculaId = starRating.dataset.peliculaId;
+        const ratingInfo = document.querySelector('.rating-info');
+        
+        // Establecer rating inicial si existe
+        {% if resena_usuario %}
+            const currentRating = {{ resena_usuario.calificacion }};
+            updateStars(currentRating);
+        {% endif %}
+        
+        // Eventos para las estrellas
+        stars.forEach((star, index) => {
+            const rating = index + 1;
+            
+            // Hover effect
+            star.addEventListener('mouseenter', function() {
+                updateStars(rating, true);
+            });
+            
+            // Click to rate
+            star.addEventListener('click', function() {
+                submitRating(peliculaId, rating);
+            });
+        });
+        
+        // Reset hover on mouseleave
+        starRating.addEventListener('mouseleave', function() {
+            {% if resena_usuario %}
+                updateStars({{ resena_usuario.calificacion }});
+            {% else %}
+                updateStars(0);
+            {% endif %}
+        });
+        
+        function updateStars(rating, isHover = false) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.style.color = '#ffc107';
+                } else {
+                    star.style.color = '#ddd';
+                }
+            });
+            
+            if (ratingInfo) {
+                if (rating > 0) {
+                    const descriptions = ['', 'Muy mala', 'Mala', 'Regular', 'Buena', 'Excelente'];
+                    ratingInfo.innerHTML = `<small class="text-success">${isHover ? 'Calificar:' : 'Tu puntuación:'} ${rating}/5 - ${descriptions[rating]}</small>`;
+                } else {
+                    ratingInfo.innerHTML = '<small class="text-muted">Haz clic en las estrellas para calificar</small>';
+                }
+            }
+        }
+        
+        function submitRating(peliculaId, rating) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            
+            if (!csrfToken) {
+                console.error('Token CSRF no encontrado');
+                return;
+            }
+            
+            fetch(`/api/calificar/${peliculaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken.value,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    calificacion: rating
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateStars(rating);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Calificado!',
+                        text: data.message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    
+                    // Actualizar la información del rating
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo guardar tu calificación',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'Hubo un problema al procesar tu solicitud',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+        }
+    }
+
+    // Sistema de control de comentarios
+    const comentariosList = document.querySelector('.comentarios-lista');
+    const comentarioItems = document.querySelectorAll('.comentario-item');
+    const btnToggleComentarios = document.getElementById('btn-toggle-comentarios');
+    const controlesRotacion = document.getElementById('controles-rotacion');
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnSiguiente = document.getElementById('btn-siguiente');
+    const btnAutoRotate = document.getElementById('btn-auto-rotate');
+    const contadorComentarios = document.getElementById('contador-comentarios');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleText = document.getElementById('toggle-text');
+
+    let comentarioActualIndex = 0;
+    let modoCompacto = false;
+    let rotacionAutomatica = false;
+    let intervaloRotacion = null;
+
+    if (btnToggleComentarios && comentarioItems.length > 0) {
+        // Botón de colapsar/expandir
+        btnToggleComentarios.addEventListener('click', function() {
+            modoCompacto = !modoCompacto;
+            
+            if (modoCompacto) {
+                // Modo compacto: mostrar solo un comentario
+                comentarioItems.forEach((item, index) => {
+                    item.style.display = index === comentarioActualIndex ? 'block' : 'none';
+                });
+                controlesRotacion.classList.remove('d-none');
+                toggleIcon.textContent = '📖';
+                toggleText.textContent = 'Expandir';
+                actualizarContador();
+            } else {
+                // Modo expandido: mostrar todos los comentarios
+                comentarioItems.forEach(item => {
+                    item.style.display = 'block';
+                });
+                controlesRotacion.classList.add('d-none');
+                toggleIcon.textContent = '📋';
+                toggleText.textContent = 'Compactar';
+                
+                // Detener rotación automática
+                if (rotacionAutomatica) {
+                    toggleRotacionAutomatica();
+                }
+            }
+        });
+
+        // Navegación manual
+        btnAnterior.addEventListener('click', function() {
+            if (modoCompacto) {
+                comentarioActualIndex = (comentarioActualIndex - 1 + comentarioItems.length) % comentarioItems.length;
+                mostrarComentarioActual();
+            }
+        });
+
+        btnSiguiente.addEventListener('click', function() {
+            if (modoCompacto) {
+                comentarioActualIndex = (comentarioActualIndex + 1) % comentarioItems.length;
+                mostrarComentarioActual();
+            }
+        });
+
+        // Rotación automática
+        btnAutoRotate.addEventListener('click', function() {
+            if (modoCompacto) {
+                toggleRotacionAutomatica();
+            }
+        });
+
+        function mostrarComentarioActual() {
+            if (modoCompacto && comentarioItems.length > 0) {
+                comentarioItems.forEach((item, index) => {
+                    item.style.display = index === comentarioActualIndex ? 'block' : 'none';
+                });
+                actualizarContador();
+            }
+        }
+
+        function actualizarContador() {
+            if (contadorComentarios) {
+                contadorComentarios.textContent = `${comentarioActualIndex + 1} / ${comentarioItems.length}`;
+            }
+        }
+
+        function toggleRotacionAutomatica() {
+            rotacionAutomatica = !rotacionAutomatica;
+            
+            if (rotacionAutomatica) {
+                btnAutoRotate.innerHTML = '⏸️';
+                btnAutoRotate.title = 'Pausar rotación';
+                btnAutoRotate.classList.remove('btn-outline-success');
+                btnAutoRotate.classList.add('btn-success');
+                
+                // Iniciar rotación cada 4 segundos
+                intervaloRotacion = setInterval(function() {
+                    comentarioActualIndex = (comentarioActualIndex + 1) % comentarioItems.length;
+                    mostrarComentarioActual();
+                }, 4000);
+            } else {
+                btnAutoRotate.innerHTML = '▶️';
+                btnAutoRotate.title = 'Rotación automática';
+                btnAutoRotate.classList.remove('btn-success');
+                btnAutoRotate.classList.add('btn-outline-success');
+                
+                if (intervaloRotacion) {
+                    clearInterval(intervaloRotacion);
+                    intervaloRotacion = null;
+                }
+            }
+        }
     }
 });
 
@@ -303,6 +783,169 @@ function toggleVerMasTarde(peliculaId) {
             timer: 4000
         });
     });
+}
+
+// Funcionalidad para las estrellas de calificación
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star');
+    const calificacionInput = document.getElementById('calificacion-input');
+    const formResena = document.getElementById('form-resena');
+    
+    let currentRating = parseInt(calificacionInput.value) || 0;
+    
+    // Establecer calificación inicial si existe
+    if (currentRating > 0) {
+        updateStarDisplay(currentRating);
+    }
+    
+    // Manejar hover de estrellas
+    stars.forEach((star, index) => {
+        // Efecto hover
+        star.addEventListener('mouseenter', function() {
+            const rating = index + 1;
+            updateStarDisplay(rating);
+            star.style.transform = 'scale(1.1)';
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            updateStarDisplay(currentRating);
+            star.style.transform = 'scale(1)';
+        });
+        
+        // Click para seleccionar calificación
+        star.addEventListener('click', function() {
+            const rating = index + 1;
+            currentRating = rating;
+            calificacionInput.value = rating;
+            updateStarDisplay(rating);
+            
+            // Pequeña animación de confirmación
+            star.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                star.style.transform = 'scale(1)';
+            }, 150);
+        });
+        
+        // Agregar transición suave
+        star.style.transition = 'transform 0.2s ease, color 0.2s ease';
+    });
+    
+    function updateStarDisplay(rating) {
+        const ratingText = document.getElementById('rating-text');
+        
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.innerHTML = '★'; // Estrella llena
+                star.style.color = '#ffc107'; // Amarillo dorado
+                star.style.textShadow = '1px 1px 2px rgba(0,0,0,0.3)';
+            } else {
+                star.innerHTML = '☆'; // Estrella vacía
+                star.style.color = '#6c757d'; // Gris
+                star.style.textShadow = 'none';
+            }
+        });
+        
+        // Actualizar texto descriptivo
+        if (rating > 0) {
+            const descriptions = [
+                '', // 0 estrellas
+                'Muy mala', // 1 estrella
+                'Mala', // 2 estrellas  
+                'Regular', // 3 estrellas
+                'Buena', // 4 estrellas
+                'Excelente' // 5 estrellas
+            ];
+            ratingText.textContent = `${rating} ${rating === 1 ? 'estrella' : 'estrellas'} - ${descriptions[rating]}`;
+            ratingText.className = 'text-warning fw-bold';
+        } else {
+            ratingText.textContent = 'Selecciona tu calificación';
+            ratingText.className = 'text-muted';
+        }
+    }
+    
+    // Manejar envío del formulario de reseña
+    if (formResena) {
+        formResena.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(formResena);
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            
+            // Validar que se haya seleccionado una calificación
+            if (parseInt(calificacionInput.value) === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Calificación requerida',
+                    text: 'Por favor selecciona una calificación de 1 a 5 estrellas.',
+                    confirmButtonColor: '#007bff'
+                });
+                return;
+            }
+            
+            fetch(formResena.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken.value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Reseña guardada!',
+                        text: data.message,
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        // Recargar la página para mostrar la nueva reseña
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al guardar',
+                        text: 'No se pudo guardar tu reseña. Intenta de nuevo.',
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de conexión',
+                    text: 'Hubo un problema al procesar tu solicitud.',
+                    confirmButtonColor: '#007bff'
+                });
+            });
+        });
+    }
+});
+
+// Función para mostrar/ocultar formularios de respuesta
+function toggleFormularioRespuesta(comentarioId) {
+    const formulario = document.getElementById(`form-respuesta-${comentarioId}`);
+    if (formulario) {
+        if (formulario.classList.contains('d-none')) {
+            // Ocultar otros formularios abiertos
+            const todosFormularios = document.querySelectorAll('[id^="form-respuesta-"]');
+            todosFormularios.forEach(form => {
+                if (form !== formulario) {
+                    form.classList.add('d-none');
+                }
+            });
+            
+            // Mostrar este formulario
+            formulario.classList.remove('d-none');
+            const textarea = formulario.querySelector('textarea');
+            if (textarea) {
+                textarea.focus();
+            }
+        } else {
+            formulario.classList.add('d-none');
+        }
+    }
 }
 </script>
 {% endblock %}

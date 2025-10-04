@@ -17,7 +17,11 @@ El proyecto incluye usuarios pre-configurados para facilitar la evaluación:
 - **Listas Personales**: Los usuarios tienen favoritos y listas configuradas
 
 ### 📝 Datos de Prueba Incluidos
-- ✅ **29 películas** distribuidas en 5 categorías
+- ✅ **26 películas activas** distribuidas en 5 categorías (29 total, 3 desactivadas)
+- ✅ **22 calificaciones oficiales** (IMDb) pre-cargadas
+- ✅ **10+ reseñas de usuarios** con calificaciones activas
+- ✅ **Sistema de comentarios avanzado** con límites por usuario y respuestas anidadas
+- ✅ **5 foros por categoría** auto-generados
 - ✅ **Usuarios con perfiles** completos y géneros favoritos
 - ✅ **Listas personalizadas** con películas agregadas
 - ✅ **Imágenes y contenido** listo para usar
@@ -28,16 +32,48 @@ El proyecto incluye usuarios pre-configurados para facilitar la evaluación:
 
 FilmScoper es una plataforma web moderna desarrollada con Django que permite a los usuarios descubrir, explorar y calificar películas. El proyecto integra funcionalidades avanzadas de gestión de usuarios, sistema de reseñas, categorización de películas y una interfaz de usuario elegante con Bootstrap 5.
 
+## 🚀 Últimas Mejoras Implementadas (Octubre 2025)
+
+### 🔧 Sistema de Comentarios Avanzado
+- **Límites Inteligentes**: 5 comentarios padre + 10 respuestas por usuario por película
+- **Rotación Automática**: Los comentarios rotan cada 5 segundos con controles de pausa/play
+- **Interfaz Mejorada**: Botones compactos, diseño responsivo y formularios optimizados
+- **Validación Robusta**: Corrección de errores de formularios y redirecciones
+- **Threading Completo**: Respuestas anidadas con identificación clara del usuario
+
+### 🎨 Mejoras de UI/UX
+- **Botones Compactos**: Tamaño `btn-sm` para favoritos, listas y calificaciones
+- **Calificación Integrada**: Estrellas posicionadas debajo de los botones de acción
+- **Diseño Responsive**: Optimizado para dispositivos móviles y desktop
+- **Mensajes de Confirmación**: Feedback inmediato para todas las acciones del usuario
+
+### 🐛 Correcciones Técnicas
+- **URLs Corregidas**: Solucionados errores `NoReverseMatch` en redirecciones
+- **Formularios Sincronizados**: Campos de formulario alineados entre templates y vistas
+- **Base de Datos Optimizada**: Películas activas/inactivas gestionadas correctamente
+- **Validación de Estado**: Verificación de límites y permisos antes de acciones
+
+---
+
 ## 🎯 Alcance y Estado del Proyecto
 
 ### ✅ Funcionalidades Completamente Implementadas
 - [x] **Catálogo de Películas**: Navegación por categorías (Acción, Comedia, Documentales, Romance, Terror)
 - [x] **Sistema de Usuarios**: Registro, login, logout con validaciones completas
 - [x] **Perfil de Usuario**: Gestión de información personal, foto de perfil y géneros favoritos
-- [x] **Base de Datos**: 29 películas distribuidas en 5 categorías
+- [x] **Base de Datos**: 26 películas activas distribuidas en 5 categorías (29 total)
 - [x] **Paginación**: Navegación optimizada en listados (12 películas por página)
-- [x] **Interfaz Responsiva**: Compatible con dispositivos móviles y desktop
+- [x] **Interfaz Responsiva**: Compatible con dispositivos móviles y desktop con diseño Bootstrap 5
 - [x] **Listas Personalizadas**: Sistema de favoritos y "Ver más tarde" completamente funcional
+- [x] **Sistema de Reseñas y Calificaciones**: Interfaz completa para calificar películas (1-5 estrellas) con AJAX integrado
+- [x] **Sistema Doble de Calificaciones**: IMDb/Oficial + Promedio FilmScoper en tarjetas y detalles
+- [x] **Sistema Avanzado de Comentarios**: 
+  - Límites por usuario: 5 comentarios padre + 10 respuestas por película
+  - Respuestas anidadas con threading completo
+  - Rotación automática de comentarios con controles manuales
+  - Validación completa de formularios con corrección de errores
+  - Interfaz compacta con botones pequeños y diseño optimizado
+- [x] **Sistema de Foros**: Modelos de datos y estructura backend para foros por categorías
 - [x] **Protección de Rutas**: Decoradores `@login_required` para vistas sensibles
 - [x] **Validación de Formularios**: Django Forms con validación híbrida cliente/servidor
 - [x] **CSRF Protection**: Protección contra ataques de falsificación de solicitudes
@@ -51,9 +87,7 @@ FilmScoper es una plataforma web moderna desarrollada con Django que permite a l
 - [ ] **Filtros Avanzados**: Interfaz creada pero sin lógica de filtrado
 
 ### ❌ Funcionalidades Pendientes (No Implementadas)
-- [ ] **Sistema de Reseñas y Calificaciones**: Modelos creados pero sin interfaz funcional
-- [ ] **Sistema de Foros**: Completamente ausente
-- [ ] **Comentarios en Películas**: Sin implementar
+- [ ] **Interfaz de Foros**: Templates y vistas para navegación de foros (backend completo)
 - [ ] **Sistema de Recomendaciones**: No desarrollado
 - [ ] **Notificaciones Push**: No implementado
 - [ ] **API REST**: Sin desarrollar
@@ -115,6 +149,8 @@ python manage.py migrate
 ```bash
 python manage.py poblar_peliculas
 python manage.py agregar_peliculas
+python manage.py poblar_calificaciones
+python manage.py crear_foros
 ```
 
 ### 6. Crear Superusuario (Opcional)
@@ -166,10 +202,16 @@ FilmScoperProyect/
 
 ### Para Usuarios (Funcionalidades Disponibles)
 1. **Registro**: Crear cuenta con email, fecha de nacimiento y géneros favoritos
-2. **Exploración**: Navegar por categorías de películas
-3. **Perfil**: Personalizar información personal y foto de perfil
-4. **Listas**: Agregar/quitar películas de favoritos y "ver más tarde"
-5. **Visualización**: Ver detalles completos de cada película
+2. **Exploración**: Navegar por categorías de películas con calificaciones duales
+3. **Calificación**: Puntuar películas del 1-5 estrellas con interfaz AJAX integrada
+4. **Comentarios Avanzados**: 
+   - Escribir hasta 5 comentarios principales por película
+   - Responder hasta 10 veces por película con comentarios anidados
+   - Sistema de rotación automática de comentarios con controles manuales
+   - Formularios con validación completa y mensajes de confirmación
+5. **Perfil**: Personalizar información personal y foto de perfil
+6. **Listas Personalizadas**: Agregar/quitar películas de favoritos y "ver más tarde" con notificaciones
+7. **Visualización Mejorada**: Ver detalles completos con ratings oficiales vs. comunidad, botones compactos y diseño responsive
 
 ### Para Administradores
 1. **Panel Admin**: Acceder a `/admin/` con credenciales de superusuario
@@ -178,9 +220,8 @@ FilmScoperProyect/
 4. **Comandos**: Usar comandos personalizados para poblar datos
 
 ### ⚠️ Limitaciones Actuales
-- **Sin Sistema de Calificación**: No se pueden calificar películas (pendiente)
 - **Sin Búsqueda Funcional**: El buscador no procesa consultas
-- **Sin Foros**: No hay sistema de discusión entre usuarios
+- **Sin Interfaz de Foros**: Backend completo pero sin templates de navegación
 - **Sin Recomendaciones**: No hay sugerencias personalizadas
 
 ## 🧪 Ejecutar Pruebas
@@ -206,10 +247,14 @@ python manage.py test core.tests.PeliculaModelTest
 - **Pillow**: Biblioteca de procesamiento de imágenes para ImageField
 
 ### Frontend
-- **Bootstrap 5.3.7**: Framework CSS responsivo (CDN)
-- **SweetAlert2**: Notificaciones elegantes (CDN)
-- **JavaScript ES6**: Funcionalidades interactivas
-- **CSS3**: Estilos personalizados
+- **Bootstrap 5.3.7**: Framework CSS responsivo con diseño compacto y botones optimizados
+- **SweetAlert2**: Notificaciones elegantes para confirmaciones de acciones
+- **JavaScript ES6**: 
+  - Funcionalidades interactivas avanzadas
+  - Sistema de rotación de comentarios con auto-play
+  - Controles dinámicos para formularios de respuesta
+  - Validación client-side integrada
+- **CSS3**: Estilos personalizados con diseño responsive
 
 ### Funcionalidades Django Utilizadas
 - **Django ORM**: Para manejo de base de datos y modelos
@@ -235,21 +280,25 @@ python manage.py test core.tests.PeliculaModelTest
 - **Categoría**: Sistema de clasificación por géneros
 - **Listas Personales**: Favoritos y "Ver más tarde" (ManyToMany)
 
-### Entidades Creadas pero Sin Interfaz
-- **Reseña**: Modelo completo para calificaciones (1-5 estrellas) y comentarios
-- **Sistema de Puntuación**: Validación de rangos implementada
+### Entidades Implementadas Completamente
+- **Reseña**: Sistema completo de calificaciones (1-5 estrellas) con interfaz AJAX integrada
+- **ComentarioPelicula**: Sistema avanzado de comentarios múltiples con límites por usuario (5+10), respuestas anidadas, rotación automática y validación completa
+- **ForoCategoria/TemaDeForo/RespuestaForo**: Estructura completa de foros (sin interfaz)
 
 ### Relaciones Implementadas
 - Usuario → PerfilUsuario (1:1) ✅
 - Usuario → Listas Personales (M:M) ✅  
 - Película → Categoría (M:M) ✅
-- Usuario → Reseña (1:N) ⚠️ *Modelo creado, interfaz pendiente*
-- Película → Reseña (1:N) ⚠️ *Modelo creado, interfaz pendiente*
+- Usuario → Reseña (1:N) ✅ *Interfaz completa con AJAX*
+- Película → Reseña (1:N) ✅ *Promedio automático*
+- Usuario → ComentarioPelicula (1:N) ✅ *Sistema avanzado con límites (5 padre + 10 respuestas)*
+- Película → ComentarioPelicula (1:N) ✅ *Threading completo con rotación y validación*
+- Categoría → ForoCategoria (1:1) ✅ *Backend completo*
 
 ### Relaciones Pendientes
-- Usuario → Foros (No implementado)
-- Película → Comentarios (No implementado)
 - Usuario → Seguimiento (No planificado)
+- Usuario → Notificaciones (No implementado)
+- Película → Recomendaciones (No implementado)
 
 ## 🚀 Despliegue en Producción
 
@@ -288,10 +337,10 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 🎯 Roadmap y Desarrollo Futuro
 
 ### 🚧 Próximas Implementaciones (Prioridad Alta)
-- [ ] **Sistema de Reseñas Completo**: Interfaz para calificar y comentar películas
-- [ ] **Búsqueda Funcional**: Backend para búsqueda por título, género, año
-- [ ] **Sistema de Foros**: Discusiones por categorías y películas específicas
-- [ ] **Notificaciones Completas**: Sistema integral de notificaciones
+- [ ] **Interfaz de Foros**: Templates para navegación, creación de temas y moderación
+- [ ] **Búsqueda Funcional**: Backend para búsqueda por título, género, año con filtros avanzados
+- [ ] **Sistema de Moderación**: Reportes de comentarios, administración de contenido y moderación automática
+- [x] ~~**Sistema de Comentarios Avanzado**: Límites, rotación y threading~~ ✅ **COMPLETADO**
 
 ### 🎯 Funcionalidades Planificadas (Prioridad Media)
 - [ ] **API REST**: Para posibles aplicaciones móviles

@@ -43,12 +43,22 @@ class Pelicula(models.Model):
     fecha_actualizada = models.DateTimeField(auto_now=True)
     activa = models.BooleanField(default=True)
     
-    # Calificación promedio (se calculará automáticamente)
+    # Calificación oficial (estática, de fuentes externas como IMDb)
+    calificacion_oficial = models.DecimalField(
+        max_digits=3, 
+        decimal_places=1, 
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)],
+        help_text="Calificación oficial de fuentes externas (IMDb, Rotten Tomatoes, etc.)"
+    )
+    
+    # Calificación FilmScoper (promedio de usuarios)
     calificacion_promedio = models.DecimalField(
         max_digits=3, 
         decimal_places=1, 
         default=0.0,
-        validators=[MinValueValidator(0.0), MaxValueValidator(5.0)]
+        validators=[MinValueValidator(0.0), MaxValueValidator(5.0)],
+        help_text="Promedio de calificaciones de usuarios de FilmScoper"
     )
     total_calificaciones = models.PositiveIntegerField(default=0)
     
@@ -75,6 +85,28 @@ class Pelicula(models.Model):
             self.calificacion_promedio = 0.0
             self.total_calificaciones = 0
         self.save(update_fields=['calificacion_promedio', 'total_calificaciones'])
+    
+    def get_calificacion_oficial_display(self):
+        """Devuelve la calificación oficial formateada (sobre 10)"""
+        if self.calificacion_oficial > 0:
+            return f"{self.calificacion_oficial:.1f}/10"
+        return "N/A"
+    
+    def get_calificacion_filmscoper_display(self):
+        """Devuelve la calificación de FilmScoper formateada (sobre 5)"""
+        if self.calificacion_promedio > 0:
+            return f"{self.calificacion_promedio:.1f}/5"
+        return "Sin calificar"
+    
+    def get_estrellas_oficial(self):
+        """Convierte la calificación oficial (1-10) a estrellas (1-5)"""
+        if self.calificacion_oficial > 0:
+            return round((self.calificacion_oficial / 10) * 5, 1)
+        return 0
+    
+    def get_estrellas_filmscoper(self):
+        """Devuelve las estrellas de FilmScoper directamente"""
+        return float(self.calificacion_promedio) if self.calificacion_promedio > 0 else 0
 
 # Perfil extendido del usuario
 class PerfilUsuario(models.Model):
@@ -168,3 +200,164 @@ class ListaVerMasTarde(models.Model):
     
     def __str__(self):
         return f"{self.usuario.username} - {self.pelicula.titulo}"
+
+
+# ===== MODELOS PARA SISTEMA DE FOROS =====
+
+class ForoCategoria(models.Model):
+    """Foros organizados por categorías de películas"""
+    categoria = models.OneToOneField(Categoria, on_delete=models.CASCADE, related_name='foro')
+    descripcion = models.TextField(blank=True, help_text="Descripción del foro de esta categoría")
+    
+    # Configuraciones
+    activo = models.BooleanField(default=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Foro de Categoría"
+        verbose_name_plural = "Foros de Categorías"
+        ordering = ['categoria__nombre']
+    
+    def __str__(self):
+        return f"Foro de {self.categoria.nombre}"
+    
+    @property
+    def total_temas(self):
+        return self.temas.filter(activo=True).count()
+    
+    @property
+    def ultimo_tema(self):
+        return self.temas.filter(activo=True).order_by('-fecha_creacion').first()
+
+
+class TemaDeForo(models.Model):
+    """Temas de discusión dentro de cada foro"""
+    foro = models.ForeignKey(ForoCategoria, on_delete=models.CASCADE, related_name='temas')
+    autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='temas_creados')
+    
+    # Contenido
+    titulo = models.CharField(max_length=200)
+    contenido = models.TextField()
+    
+    # Opcionales: relacionar con película específica
+    pelicula_relacionada = models.ForeignKey(
+        Pelicula, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='temas_foro',
+        help_text="Película específica de la que trata este tema (opcional)"
+    )
+    
+    # Estado
+    activo = models.BooleanField(default=True)
+    cerrado = models.BooleanField(default=False, help_text="Si está cerrado, no se pueden agregar respuestas")
+    destacado = models.BooleanField(default=False, help_text="Temas destacados aparecen primero")
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Tema de Foro"
+        verbose_name_plural = "Temas de Foro"
+        ordering = ['-destacado', '-fecha_actualizacion']
+    
+    def __str__(self):
+        return f"{self.titulo} - {self.foro.categoria.nombre}"
+    
+    @property
+    def total_respuestas(self):
+        return self.respuestas.filter(activo=True).count()
+    
+    @property
+    def ultima_respuesta(self):
+        return self.respuestas.filter(activo=True).order_by('-fecha_creacion').first()
+    
+    def save(self, *args, **kwargs):
+        # Actualizar fecha de última actividad del tema
+        from django.utils import timezone
+        self.fecha_actualizacion = timezone.now()
+        super().save(*args, **kwargs)
+
+
+class RespuestaForo(models.Model):
+    """Respuestas a los temas del foro"""
+    tema = models.ForeignKey(TemaDeForo, on_delete=models.CASCADE, related_name='respuestas')
+    autor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='respuestas_foro')
+    
+    # Contenido
+    contenido = models.TextField()
+    
+    # Estado
+    activo = models.BooleanField(default=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Respuesta de Foro"
+        verbose_name_plural = "Respuestas de Foro"
+        ordering = ['fecha_creacion']
+    
+    def __str__(self):
+        return f"Respuesta de {self.autor.username} en '{self.tema.titulo}'"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Actualizar la fecha de última actividad del tema
+        self.tema.save()
+
+
+# ===== MODELO PARA COMENTARIOS MÚLTIPLES =====
+
+class ComentarioPelicula(models.Model):
+    """Comentarios múltiples por usuario en películas (separado de calificaciones)"""
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comentarios_peliculas')
+    pelicula = models.ForeignKey(Pelicula, on_delete=models.CASCADE, related_name='comentarios')
+    
+    # Contenido del comentario
+    contenido = models.TextField(max_length=1000, help_text="Comparte tu opinión sobre esta película")
+    
+    # Respuesta a otro comentario (para threading)
+    respuesta_a = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='respuestas',
+        help_text="Comentario al que responde (opcional)"
+    )
+    
+    # Estado
+    activo = models.BooleanField(default=True)
+    
+    # Metadatos
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Comentario de Película"
+        verbose_name_plural = "Comentarios de Películas"
+        ordering = ['-fecha_creacion']
+        indexes = [
+            models.Index(fields=['pelicula', '-fecha_creacion']),
+            models.Index(fields=['usuario', '-fecha_creacion']),
+        ]
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.pelicula.titulo} - {self.fecha_creacion.strftime('%d/%m/%Y')}"
+    
+    @property
+    def es_respuesta(self):
+        """Indica si este comentario es una respuesta a otro"""
+        return self.respuesta_a is not None
+    
+    @property
+    def total_respuestas(self):
+        """Número de respuestas que tiene este comentario"""
+        return self.respuestas.filter(activo=True).count()

@@ -31,8 +31,32 @@
                                 <h3>{{ pelicula.titulo }}</h3>
                                 <p class="year">{{ pelicula.año }}</p>
                                 <p class="genre">{{ categoria.nombre }}</p>
+                                
+                                <!-- Calificación Oficial -->
+                                {% if pelicula.calificacion_oficial > 0 %}
+                                    <div class="rating-section mb-1">
+                                        <small class="text-warning fw-bold">
+                                            🌟 {{ pelicula.get_calificacion_oficial_display }}
+                                        </small>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">IMDb</small>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Calificación FilmScoper -->
                                 {% if pelicula.calificacion_promedio > 0 %}
-                                    <p class="rating">★★★★☆ {{ pelicula.calificacion_promedio }}/5</p>
+                                    <div class="rating-section">
+                                        <small class="text-info fw-bold">
+                                            ⭐ {{ pelicula.get_calificacion_filmscoper_display }}
+                                        </small>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">FilmScoper ({{ pelicula.total_calificaciones }})</small>
+                                    </div>
+                                {% else %}
+                                    {% if pelicula.calificacion_oficial > 0 %}
+                                        <div class="rating-section">
+                                            <small class="text-muted">⭐ Sin calificar</small>
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">FilmScoper</small>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         </div>

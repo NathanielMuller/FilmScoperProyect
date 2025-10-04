@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
-from .forms import RegistroForm, LoginForm, ReseñaForm, PerfilForm
-from .models import Pelicula, Categoria, Reseña, PerfilUsuario
+from .forms import RegistroForm, LoginForm, ReseñaForm, PerfilForm, ComentarioPeliculaForm
+from .models import Pelicula, Categoria, Reseña, PerfilUsuario, ComentarioPelicula
 
 
 def index(request):
@@ -176,9 +176,125 @@ def pelicula(request):
             activa=True
         ).exclude(id=pelicula.id).distinct()[:4]
         
+        # Obtener reseñas de la película (sistema de rating)
+        reseñas = Reseña.objects.filter(
+            pelicula=pelicula, 
+            activa=True
+        ).select_related('usuario').order_by('-fecha_creacion')
+        
+        # Obtener reseña del usuario actual si está autenticado
+        reseña_usuario = None
+        formulario_reseña = None
+        
+        if request.user.is_authenticated:
+            try:
+                reseña_usuario = Reseña.objects.get(usuario=request.user, pelicula=pelicula)
+                formulario_reseña = ReseñaForm(instance=reseña_usuario, user=request.user, pelicula=pelicula)
+            except Reseña.DoesNotExist:
+                formulario_reseña = ReseñaForm(user=request.user, pelicula=pelicula)
+        
+        # Obtener comentarios de la película (sistema de comentarios múltiples)
+        comentarios = ComentarioPelicula.objects.filter(
+            pelicula=pelicula, 
+            respuesta_a=None
+        ).select_related('usuario').prefetch_related('respuestas').order_by('-fecha_creacion')
+        
+        # Agregar rating de cada usuario a los comentarios
+        for comentario in comentarios:
+            try:
+                resena_usuario = Reseña.objects.get(usuario=comentario.usuario, pelicula=pelicula)
+                comentario.usuario_rating = resena_usuario.calificacion
+            except Reseña.DoesNotExist:
+                comentario.usuario_rating = None
+        
+        # Procesar formulario de comentarios
+        formulario_comentario = None
+        if request.user.is_authenticated:
+            if request.method == 'POST' and 'contenido' in request.POST:
+                # Verificar límites de comentarios
+                comentarios_padre_usuario = ComentarioPelicula.objects.filter(
+                    usuario=request.user,
+                    pelicula=pelicula,
+                    respuesta_a=None
+                ).count()
+                
+                respuestas_usuario = ComentarioPelicula.objects.filter(
+                    usuario=request.user,
+                    pelicula=pelicula,
+                    respuesta_a__isnull=False
+                ).count()
+                
+                # Determinar si es respuesta o comentario padre
+                respuesta_a_id = request.POST.get('respuesta_a')
+                es_respuesta = respuesta_a_id is not None
+                
+                # Validar límites
+                if es_respuesta and respuestas_usuario >= 10:
+                    messages.error(request, 'Has alcanzado el límite de 10 respuestas por película.')
+                    return redirect(request.path + f"?movie={movie_slug}")
+                elif not es_respuesta and comentarios_padre_usuario >= 5:
+                    messages.error(request, 'Has alcanzado el límite de 5 comentarios por película.')
+                    return redirect(request.path + f"?movie={movie_slug}")
+                
+                formulario_comentario = ComentarioPeliculaForm(request.POST)
+                if formulario_comentario.is_valid():
+                    comentario = formulario_comentario.save(commit=False)
+                    comentario.usuario = request.user
+                    comentario.pelicula = pelicula
+                    
+                    # Si es respuesta, asignar el comentario padre
+                    if es_respuesta:
+                        try:
+                            comentario_padre = ComentarioPelicula.objects.get(
+                                id=respuesta_a_id,
+                                pelicula=pelicula
+                            )
+                            comentario.respuesta_a = comentario_padre
+                        except ComentarioPelicula.DoesNotExist:
+                            messages.error(request, 'El comentario al que intentas responder no existe.')
+                            return redirect(request.path + f"?movie={movie_slug}")
+                    
+                    comentario.save()
+                    
+                    mensaje_tipo = 'respuesta' if es_respuesta else 'comentario'
+                    messages.success(request, f'¡{mensaje_tipo.capitalize()} agregado exitosamente!')
+                    return redirect(request.path + f"?movie={movie_slug}")
+            else:
+                formulario_comentario = ComentarioPeliculaForm()
+        
+        # Obtener límites de comentarios para el usuario actual
+        comentarios_limite_info = {}
+        if request.user.is_authenticated:
+            comentarios_padre_usuario = ComentarioPelicula.objects.filter(
+                usuario=request.user,
+                pelicula=pelicula,
+                respuesta_a=None
+            ).count()
+            
+            respuestas_usuario = ComentarioPelicula.objects.filter(
+                usuario=request.user,
+                pelicula=pelicula,
+                respuesta_a__isnull=False
+            ).count()
+            
+            comentarios_limite_info = {
+                'comentarios_padre': comentarios_padre_usuario,
+                'respuestas': respuestas_usuario,
+                'limite_comentarios_padre': 5,
+                'limite_respuestas': 10,
+                'puede_comentar': comentarios_padre_usuario < 5,
+                'puede_responder': respuestas_usuario < 10,
+            }
+
         context = {
             'pelicula': pelicula,
             'peliculas_relacionadas': peliculas_relacionadas,
+            'reseñas': reseñas,
+            'reseña_usuario': reseña_usuario,
+            'formulario_reseña': formulario_reseña,
+            'comentarios': comentarios,
+            'formulario_comentario': formulario_comentario,
+            'comentarios_limite_info': comentarios_limite_info,
         }
         
         return render(request, 'core/pelicula.html', context)
@@ -220,29 +336,65 @@ def perfil(request):
 def calificar_pelicula(request, pelicula_id):
     """Vista para calificar una película (AJAX)"""
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'success': False,
+                'message': 'Debes iniciar sesión para calificar'
+            })
+            
         pelicula = get_object_or_404(Pelicula, id=pelicula_id)
         
-        # Verificar si ya existe una reseña del usuario
-        reseña, created = Reseña.objects.get_or_create(
-            usuario=request.user,
-            pelicula=pelicula,
-            defaults={'calificacion': 1, 'comentario': ''}
-        )
-        
-        form = ReseñaForm(request.POST, instance=reseña, user=request.user, pelicula=pelicula)
-        if form.is_valid():
-            form.save()
+        try:
+            # Obtener calificación desde JSON o POST data
+            if request.content_type == 'application/json':
+                import json
+                data = json.loads(request.body)
+                calificacion = int(data.get('calificacion', 0))
+            else:
+                calificacion = int(request.POST.get('calificacion', 0))
+            
+            # Validar calificación
+            if calificacion < 1 or calificacion > 5:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'La calificación debe estar entre 1 y 5 estrellas'
+                })
+            
+            # Crear o actualizar reseña del usuario (solo rating, sin comentario)
+            reseña, created = Reseña.objects.get_or_create(
+                usuario=request.user,
+                pelicula=pelicula,
+                defaults={'calificacion': calificacion, 'comentario': ''}
+            )
+            
+            if not created:
+                # Actualizar calificación existente
+                reseña.calificacion = calificacion
+                reseña.save()
+                mensaje = f'Tu calificación ha sido actualizada a {calificacion}/5 estrellas'
+            else:
+                mensaje = f'Has calificado esta película con {calificacion}/5 estrellas'
+            
+            # Actualizar promedio de la película
+            pelicula.actualizar_calificacion()
             
             return JsonResponse({
                 'success': True,
-                'message': 'Calificación guardada exitosamente',
+                'message': mensaje,
+                'calificacion_usuario': calificacion,
                 'nueva_calificacion': pelicula.calificacion_promedio,
                 'total_calificaciones': pelicula.total_calificaciones
             })
-        else:
+            
+        except (ValueError, TypeError, json.JSONDecodeError):
             return JsonResponse({
                 'success': False,
-                'errors': form.errors
+                'message': 'Calificación inválida'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'Error al guardar la calificación'
             })
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'})

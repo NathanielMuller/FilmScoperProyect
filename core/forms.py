@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import PerfilUsuario, Reseña, Categoria
+from .models import PerfilUsuario, Reseña, Categoria, ComentarioPelicula
 
 class RegistroForm(UserCreationForm):
     """Formulario de registro con validación híbrida"""
@@ -182,6 +182,45 @@ class ReseñaForm(forms.ModelForm):
             reseña.save()
         
         return reseña
+
+
+class ComentarioPeliculaForm(forms.ModelForm):
+    """Formulario para comentarios múltiples en películas"""
+    class Meta:
+        model = ComentarioPelicula
+        fields = ['contenido']
+        widgets = {
+            'contenido': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Escribe tu comentario sobre esta película...',
+                'maxlength': 1000
+            })
+        }
+        labels = {
+            'contenido': 'Comentario'
+        }
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.pelicula = kwargs.pop('pelicula', None)
+        self.respuesta_a = kwargs.pop('respuesta_a', None)
+        super().__init__(*args, **kwargs)
+    
+    def save(self, commit=True):
+        """Guardar comentario con usuario y película"""
+        comentario = super().save(commit=False)
+        if self.user:
+            comentario.usuario = self.user
+        if self.pelicula:
+            comentario.pelicula = self.pelicula
+        if self.respuesta_a:
+            comentario.respuesta_a = self.respuesta_a
+        
+        if commit:
+            comentario.save()
+        
+        return comentario
 
 class PerfilForm(forms.ModelForm):
     """Formulario para editar perfil de usuario"""
