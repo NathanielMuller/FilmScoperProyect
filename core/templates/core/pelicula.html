@@ -20,8 +20,8 @@
             <!-- Imagen de la película -->
             <div class="col-lg-4 col-md-5 mb-4">
                 <div class="card shadow-lg">
-                    {% if pelicula.poster %}
-                        <img src="{% static pelicula.poster %}" class="card-img-top" alt="{{ pelicula.titulo }}" style="height: 600px; object-fit: cover;">
+                    {% if pelicula.get_poster_url %}
+                        <img src="{{ pelicula.get_poster_url }}" class="card-img-top" alt="{{ pelicula.titulo }}" style="height: 600px; object-fit: cover;">
                     {% else %}
                         <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 600px;">
                             <span class="text-white">Sin imagen disponible</span>
@@ -362,8 +362,8 @@
                                 {% url 'core:pelicula' as pelicula_url %}
                                 <a href="{{ pelicula_url }}?movie={{ pelicula_relacionada.slug }}" class="text-decoration-none">
                                     <div class="card shadow-sm h-100">
-                                        {% if pelicula_relacionada.poster %}
-                                            <img src="{% static pelicula_relacionada.poster %}" class="card-img-top" alt="{{ pelicula_relacionada.titulo }}" style="height: 300px; object-fit: cover;">
+                                        {% if pelicula_relacionada.get_poster_url %}
+                                            <img src="{{ pelicula_relacionada.get_poster_url }}" class="card-img-top" alt="{{ pelicula_relacionada.titulo }}" style="height: 300px; object-fit: cover;">
                                         {% else %}
                                             <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
                                                 <span class="text-white small">Sin imagen</span>

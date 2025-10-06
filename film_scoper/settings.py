@@ -157,3 +157,20 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 }
+
+# TMDB API Configuration
+# Obtén tu API key gratis en: https://www.themoviedb.org/settings/api
+TMDB_API_KEY = '3eb3e8f70ed1682487eb2cc3e1862f67'  # Reemplazar con tu API key real
+TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZWIzZThmNzBlZDE2ODI0ODdlYjJjYzNlMTg2MmY2NyIsIm5iZiI6MTc1OTcwODYyMC4wNTcsInN1YiI6IjY4ZTMwNWNjOWZlOTYyMDQzOTM2ZTY1YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.IeQX_gA4vMR34MkYsTJkKZq0_IOGEUZGuoUuO3rk5tI'  # Token de acceso (opcional)
+
+# Cache Configuration (para optimizar consultas a APIs externas)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 3600,  # 1 hora por defecto
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}

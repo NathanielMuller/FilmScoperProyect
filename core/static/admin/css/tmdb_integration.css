@@ -1,0 +1,253 @@
+/* Estilos para la integración TMDB en el admin de Django */
+
+/* Contador de límites TMDB */
+#tmdb-counter-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#tmdb-daily-limit, #tmdb-session-limit {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tmdb-counter-icon {
+    font-size: 16px;
+}
+
+.tmdb-count {
+    font-weight: bold;
+    font-size: 15px;
+    color: #4CAF50;
+}
+
+.tmdb-count.warning {
+    color: #FF9800;
+}
+
+.tmdb-count.danger {
+    color: #F44336;
+}
+
+.tmdb-total {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    #tmdb-counter-container {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+}
+
+#tmdb-search-container {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#tmdb-search-container h3 {
+    margin-top: 0;
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.tmdb-search-form {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 15px;
+}
+
+.tmdb-search-input-group {
+    flex: 1;
+}
+
+.tmdb-search-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.tmdb-search-input-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#btn-buscar-tmdb {
+    background: #ff6b35;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    height: 36px;
+}
+
+#btn-buscar-tmdb:hover {
+    background: #e55a2b;
+}
+
+#tmdb-results-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+}
+
+.tmdb-movie-option {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+.tmdb-movie-option:hover {
+    background: rgba(255,255,255,1);
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.tmdb-movie-option.selected {
+    background: #4caf50;
+    color: white;
+    transform: translateX(8px);
+}
+
+.tmdb-movie-poster {
+    width: 60px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.tmdb-movie-poster.no-poster {
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #999;
+    text-align: center;
+}
+
+.tmdb-movie-info {
+    flex: 1;
+}
+
+.tmdb-movie-title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.tmdb-movie-year {
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.tmdb-movie-rating {
+    background: #ff9800;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.tmdb-use-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.tmdb-use-btn:hover {
+    background: #45a049;
+}
+
+.tmdb-loading {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+.tmdb-error {
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid #f44336;
+    color: #f44336;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.tmdb-success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid #4caf50;
+    color: #4caf50;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+/* Animación para campos que se actualizan */
+.field-updated {
+    background: #e8f5e8 !important;
+    border: 2px solid #4caf50 !important;
+    transition: all 0.3s ease;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+    .tmdb-search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tmdb-movie-option {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .tmdb-movie-poster {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}

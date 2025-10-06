@@ -35,7 +35,7 @@ class Pelicula(models.Model):
     categorias = models.ManyToManyField(Categoria, related_name='peliculas')
     
     # Imágenes
-    poster = models.ImageField(upload_to='peliculas/posters/', blank=True)
+    poster = models.URLField(blank=True, help_text="URL del poster desde TMDB")
     banner = models.ImageField(upload_to='peliculas/banners/', blank=True)
     
     # Metadatos
@@ -49,7 +49,7 @@ class Pelicula(models.Model):
         decimal_places=1, 
         default=0.0,
         validators=[MinValueValidator(0.0), MaxValueValidator(10.0)],
-        help_text="Calificación oficial de fuentes externas (IMDb, Rotten Tomatoes, etc.)"
+        help_text="Calificación oficial de fuentes externas (TMDB, IMDb, Rotten Tomatoes, etc.)"
     )
     
     # Calificación FilmScoper (promedio de usuarios)
@@ -97,6 +97,10 @@ class Pelicula(models.Model):
         if self.calificacion_promedio > 0:
             return f"{self.calificacion_promedio:.1f}/5"
         return "Sin calificar"
+    
+    def get_poster_url(self):
+        """Devuelve la URL del poster desde TMDB"""
+        return self.poster if self.poster else None
     
     def get_estrellas_oficial(self):
         """Convierte la calificación oficial (1-10) a estrellas (1-5)"""

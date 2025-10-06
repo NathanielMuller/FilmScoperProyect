@@ -20,8 +20,8 @@
                 <div class="item-container">
                     <a href="{% url 'core:pelicula' %}?movie={{ pelicula.slug }}">
                         <div class="item">
-                            {% if pelicula.poster %}
-                                <img src="{% static pelicula.poster %}" alt="{{ pelicula.titulo }}">
+                            {% if pelicula.get_poster_url %}
+                                <img src="{{ pelicula.get_poster_url }}" alt="{{ pelicula.titulo }}">
                             {% else %}
                                 <div class="no-poster bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
                                     <span class="text-white">Sin imagen</span>

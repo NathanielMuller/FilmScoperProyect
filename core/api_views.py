@@ -14,6 +14,7 @@ from .serializers import (
     ReseñaSerializer, ReseñaCreateSerializer, CategoriaSerializer,
     ComentarioPeliculaSerializer, PeliculaStatsSerializer, UsuarioStatsSerializer
 )
+from .services import tmdb_service
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -384,3 +385,151 @@ def buscar_peliculas(request):
     
     serializer = PeliculaListSerializer(queryset.distinct(), many=True)
     return Response(serializer.data)
+
+
+# ============ APIS DE SERVICIOS EXTERNOS ============
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden buscar portadas
+def buscar_portadas_tmdb(request):
+    """
+    Buscar portadas de películas en TMDB
+    GET: /api/tmdb/buscar-portadas/?titulo=nombre&año=2020
+    """
+    titulo = request.GET.get('titulo', '').strip()
+    año = request.GET.get('año', '')
+    
+    if not titulo:
+        return Response(
+            {'error': 'El parámetro "titulo" es requerido'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Convertir año a entero si se proporciona
+    year_int = None
+    if año:
+        try:
+            year_int = int(año)
+        except ValueError:
+            return Response(
+                {'error': 'El parámetro "año" debe ser un número válido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    try:
+        # Buscar en TMDB
+        resultados = tmdb_service.search_movies(titulo, year_int)
+        
+        return Response({
+            'titulo_buscado': titulo,
+            'año_filtro': year_int,
+            'total_resultados': len(resultados),
+            'resultados': resultados
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error al consultar TMDB: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def asignar_portada_tmdb(request):
+    """
+    Asignar portada de TMDB a una película existente
+    POST: /api/tmdb/asignar-portada/
+    Body: {
+        "pelicula_id": 123,
+        "tmdb_poster_path": "/path/to/poster.jpg",
+        "tmdb_id": 456
+    }
+    """
+    pelicula_id = request.data.get('pelicula_id')
+    tmdb_poster_path = request.data.get('tmdb_poster_path')
+    tmdb_id = request.data.get('tmdb_id')
+    
+    if not pelicula_id or not tmdb_poster_path:
+        return Response(
+            {'error': 'Los campos "pelicula_id" y "tmdb_poster_path" son requeridos'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Obtener la película
+        pelicula = Pelicula.objects.get(id=pelicula_id, activa=True)
+        
+        # Verificar permisos (solo staff puede modificar)
+        if not request.user.is_staff:
+            return Response(
+                {'error': 'Solo el staff puede asignar portadas'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Generar URL completa de la portada
+        from .services import get_poster_url
+        poster_url_medium = get_poster_url(tmdb_poster_path, 'medium')
+        poster_url_large = get_poster_url(tmdb_poster_path, 'large')
+        
+        # Guardar información TMDB en la película (podrías agregar campos al modelo)
+        # Por ahora, solo devolvemos la información para uso manual
+        
+        return Response({
+            'mensaje': 'Portada encontrada exitosamente',
+            'pelicula': {
+                'id': pelicula.id,
+                'titulo': pelicula.titulo,
+            },
+            'tmdb_info': {
+                'tmdb_id': tmdb_id,
+                'poster_path': tmdb_poster_path,
+                'poster_url_medium': poster_url_medium,
+                'poster_url_large': poster_url_large,
+            },
+            'instrucciones': 'Copia la URL de la portada y úsala para actualizar el campo poster de la película'
+        })
+        
+    except Pelicula.DoesNotExist:
+        return Response(
+            {'error': 'Película no encontrada'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Error al procesar la solicitud: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def peliculas_populares_tmdb(request):
+    """
+    Obtener películas populares de TMDB (para descubrimiento)
+    GET: /api/tmdb/populares/
+    """
+    page = request.GET.get('page', 1)
+    
+    try:
+        page_int = int(page)
+        if page_int < 1:
+            page_int = 1
+    except ValueError:
+        page_int = 1
+    
+    try:
+        peliculas_populares = tmdb_service.get_popular_movies(page_int)
+        
+        return Response({
+            'page': page_int,
+            'total_resultados': len(peliculas_populares),
+            'peliculas': peliculas_populares,
+            'info': 'Películas populares obtenidas de TMDB - puedes usar estas como referencia para agregar a tu catálogo'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error al obtener películas populares: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

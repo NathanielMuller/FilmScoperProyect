@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, tmdb_views
 
 app_name = 'core'
 
@@ -36,4 +36,12 @@ urlpatterns = [
     # Nuevas APIs para listas personales
     path('toggle-favorito/<int:pelicula_id>/', views.toggle_favorito, name='toggle_favorito_nuevo'),
     path('toggle-ver-mas-tarde-nuevo/<int:pelicula_id>/', views.toggle_ver_mas_tarde_nuevo, name='toggle_ver_mas_tarde_nuevo'),
+    
+    # URLs para integración TMDB (solo para staff)
+    path('tmdb/buscar-portadas/', tmdb_views.buscar_portadas_admin, name='tmdb_buscar_portadas'),
+    path('tmdb/agregar-pelicula/', tmdb_views.agregar_pelicula_con_tmdb, name='tmdb_agregar_pelicula'),
+    path('tmdb/ajax/buscar-portadas/', tmdb_views.ajax_buscar_portadas, name='tmdb_ajax_buscar'),
+    path('tmdb/ajax/asignar-portada/', tmdb_views.ajax_asignar_portada, name='tmdb_ajax_asignar'),
+    path('tmdb/ajax/obtener-detalles/', tmdb_views.ajax_obtener_detalles_completos, name='tmdb_ajax_detalles'),
+    path('tmdb/ajax/usage-counter/', tmdb_views.ajax_tmdb_usage_counter, name='tmdb_ajax_usage_counter'),
 ]

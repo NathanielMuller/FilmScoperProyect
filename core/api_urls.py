@@ -70,6 +70,23 @@ urlpatterns = [
          name='estadisticas-usuario'),
     
     
+    # ============ ENDPOINTS DE SERVICIOS EXTERNOS ============
+    # Búsqueda de portadas en TMDB
+    path('tmdb/buscar-portadas/', 
+         api_views.buscar_portadas_tmdb, 
+         name='tmdb-buscar-portadas'),
+    
+    # Asignar portada de TMDB a película
+    path('tmdb/asignar-portada/', 
+         api_views.asignar_portada_tmdb, 
+         name='tmdb-asignar-portada'),
+    
+    # Películas populares de TMDB
+    path('tmdb/populares/', 
+         api_views.peliculas_populares_tmdb, 
+         name='tmdb-populares'),
+    
+    
     # ============ BROWSABLE API ROOT ============
     # Navegador de API de Django REST Framework
     path('', include('rest_framework.urls')),
@@ -118,6 +135,15 @@ GET    /api/categorias/                         - Lista todas las categorías
 === ESTADÍSTICAS ===
 GET    /api/estadisticas/peliculas/             - Estadísticas generales del sitio
 GET    /api/estadisticas/usuario/               - Estadísticas del usuario autenticado
+
+=== SERVICIOS EXTERNOS (TMDB) ===
+GET    /api/tmdb/buscar-portadas/               - Buscar portadas en TMDB por título
+POST   /api/tmdb/asignar-portada/               - Asignar portada de TMDB a película (solo staff)
+GET    /api/tmdb/populares/                     - Obtener películas populares de TMDB
+
+Parámetros para búsqueda de portadas:
+- ?titulo=nombre_pelicula                       - Título de la película a buscar (requerido)
+- ?año=2020                                     - Año para filtrar resultados (opcional)
 
 === FORMATOS DE RESPUESTA ===
 Todas las APIs devuelven datos en formato JSON.

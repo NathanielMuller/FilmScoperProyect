@@ -301,3 +301,74 @@ class PerfilForm(forms.ModelForm):
             self.save_m2m()  # Para guardar many-to-many relationships
         
         return perfil
+
+
+class PeliculaForm(forms.ModelForm):
+    """Formulario para crear y editar películas"""
+    
+    class Meta:
+        from .models import Pelicula
+        model = Pelicula
+        fields = [
+            'titulo', 'sinopsis', 'año', 'duracion', 
+            'director', 'reparto', 'categorias', 
+            'calificacion_oficial', 'poster'
+        ]
+        widgets = {
+            'titulo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Título de la película'
+            }),
+            'sinopsis': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Resumen de la película'
+            }),
+            'año': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1900,
+                'max': 2030,
+                'placeholder': '2023'
+            }),
+            'duracion': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 1,
+                'max': 500,
+                'placeholder': 'Duración en minutos'
+            }),
+            'director': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Director de la película'
+            }),
+            'reparto': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Actores principales separados por comas'
+            }),
+            'categorias': forms.CheckboxSelectMultiple(attrs={
+                'class': 'form-check-input'
+            }),
+            'calificacion_oficial': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'max': 10,
+                'step': 0.1,
+                'placeholder': 'Ej: 8.1 (TMDB/IMDb)'
+            }),
+            'poster': forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://image.tmdb.org/t/p/w500/...'
+            })
+        }
+    
+    def clean_año(self):
+        año = self.cleaned_data.get('año')
+        if año and (año < 1900 or año > 2030):
+            raise ValidationError('El año debe estar entre 1900 y 2030.')
+        return año
+    
+    def clean_duracion(self):
+        duracion = self.cleaned_data.get('duracion')
+        if duracion and duracion <= 0:
+            raise ValidationError('La duración debe ser mayor a 0 minutos.')
+        return duracion

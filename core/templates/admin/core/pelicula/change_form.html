@@ -1,0 +1,360 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block form_top %}
+    <!-- Contenedor de búsqueda TMDB para agregar y editar películas -->
+    <div id="tmdb-search-container">
+        <!-- Contador de búsquedas TMDB disponibles -->
+        <div id="tmdb-counter-container">
+            <div id="tmdb-daily-limit">
+                <span class="tmdb-counter-icon">🎯</span>
+                <span>Búsquedas TMDB disponibles hoy: </span>
+                <span id="tmdb-remaining-count" class="tmdb-count">Cargando...</span>
+                <span class="tmdb-total">/ 500</span>
+            </div>
+            <div id="tmdb-session-limit">
+                <span class="tmdb-counter-icon">⚡</span>
+                <span>En esta sesión (10 seg): </span>
+                <span id="tmdb-session-count" class="tmdb-count">20</span>
+                <span class="tmdb-total">/ 20</span>
+            </div>
+        </div>
+        
+        {% if add %}
+            <h3>🎬 Buscar película en TMDB</h3>
+            <p>Busca la película en The Movie Database para autocompletar los campos automáticamente</p>
+        {% else %}
+            <h3>🔄 Actualizar desde TMDB</h3>
+            <p>Busca en TMDB para actualizar los datos de esta película con información más reciente</p>
+        {% endif %}
+        
+        <div class="tmdb-search-form">
+            <div class="tmdb-search-input-group">
+                <label for="tmdb-search-input">Título de la película:</label>
+                <input type="text" id="tmdb-search-input" placeholder="Ej: El Padrino, Matrix, Pulp Fiction...">
+            </div>
+            <button type="button" id="btn-buscar-tmdb">Buscar</button>
+        </div>
+
+        <div id="tmdb-results-container" style="display: none;"></div>
+        <div id="tmdb-loading" class="tmdb-loading" style="display: none;">
+            Buscando películas en TMDB...
+        </div>
+        <div id="tmdb-message" style="display: none;"></div>
+    </div>
+    
+    {{ block.super }}
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+    {{ block.super }}
+    <script type="text/javascript">
+    (function($) {
+        // Ejecutar si estamos en la página de agregar o editar película
+        if (!document.querySelector('#tmdb-search-container')) return;
+        
+        const searchInput = document.getElementById('tmdb-search-input');
+        const searchButton = document.getElementById('btn-buscar-tmdb');
+        const resultsContainer = document.getElementById('tmdb-results-container');
+        const loadingDiv = document.getElementById('tmdb-loading');
+        const messageDiv = document.getElementById('tmdb-message');
+        
+        let selectedMovieData = null;
+
+        function showMessage(message, type = 'success') {
+            messageDiv.innerHTML = `<div class="tmdb-${type}">${message}</div>`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Función para cargar y actualizar el contador de uso TMDB
+        function loadTMDBCounter() {
+            fetch('/tmdb/ajax/usage-counter/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador diario
+                    const dailyCountElement = document.getElementById('tmdb-remaining-count');
+                    if (dailyCountElement) {
+                        dailyCountElement.textContent = data.daily.movies_available;
+                        dailyCountElement.className = `tmdb-count ${data.status}`;
+                    }
+                    
+                    // Actualizar contador de sesión
+                    const sessionCountElement = document.getElementById('tmdb-session-count');
+                    if (sessionCountElement) {
+                        sessionCountElement.textContent = data.session.movies_available;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar contador TMDB:', error);
+                const dailyCountElement = document.getElementById('tmdb-remaining-count');
+                if (dailyCountElement) {
+                    dailyCountElement.textContent = '500';
+                    dailyCountElement.className = 'tmdb-count';
+                }
+            });
+        }
+
+        // Función para decrementar el contador después de una búsqueda
+        function decrementCounter() {
+            const dailyCountElement = document.getElementById('tmdb-remaining-count');
+            const sessionCountElement = document.getElementById('tmdb-session-count');
+            
+            if (dailyCountElement) {
+                const currentDaily = parseInt(dailyCountElement.textContent) || 0;
+                const newDaily = Math.max(0, currentDaily - 1);
+                dailyCountElement.textContent = newDaily;
+                
+                // Actualizar clase según el nivel
+                if (newDaily <= 50) {
+                    dailyCountElement.className = 'tmdb-count danger';
+                } else if (newDaily <= 150) {
+                    dailyCountElement.className = 'tmdb-count warning';
+                } else {
+                    dailyCountElement.className = 'tmdb-count';
+                }
+            }
+            
+            if (sessionCountElement) {
+                const currentSession = parseInt(sessionCountElement.textContent) || 0;
+                sessionCountElement.textContent = Math.max(0, currentSession - 1);
+            }
+        }
+
+        function buscarPeliculas() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('Por favor ingresa el título de una película');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            messageDiv.style.display = 'none';
+            resultsContainer.innerHTML = '';
+
+            fetch('/tmdb/ajax/buscar-portadas/?' + new URLSearchParams({
+                query: query
+            }), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Response status:', response.status); // Debug
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                loadingDiv.style.display = 'none';
+                console.log('TMDB Response:', data); // Debug
+                
+                if (data.success && data.resultados && data.resultados.length > 0) {
+                    console.log('Películas encontradas:', data.resultados.length); // Debug
+                    mostrarResultados(data.resultados);
+                    // Actualizar contador tras búsqueda exitosa
+                    loadTMDBCounter();
+                } else {
+                    console.log('No se encontraron resultados'); // Debug
+                    resultsContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">No se encontraron películas con ese título.</p>';
+                    resultsContainer.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                loadingDiv.style.display = 'none';
+                console.error('Error completo:', error);
+                showMessage(`Error al buscar películas: ${error.message}`, 'error');
+                resultsContainer.innerHTML = `<p style="color: red; padding: 20px;">Error: ${error.message}</p>`;
+                resultsContainer.style.display = 'block';
+            });
+        }
+
+        function mostrarResultados(peliculas) {
+            resultsContainer.innerHTML = '';
+            console.log('Mostrando resultados para:', peliculas); // Debug
+            
+            peliculas.forEach(pelicula => {
+                console.log('Procesando película:', pelicula.title, 'ID:', pelicula.id, 'TMDB_ID:', pelicula.tmdb_id); // Debug
+                const movieOption = document.createElement('div');
+                movieOption.className = 'tmdb-movie-option';
+                movieOption.dataset.tmdbId = pelicula.tmdb_id || pelicula.id;
+                
+                const posterUrl = pelicula.poster_urls?.medium || 
+                    (pelicula.poster_path ? `https://image.tmdb.org/t/p/w200${pelicula.poster_path}` : null);
+                console.log('URL del poster generada:', posterUrl); // Debug
+                
+                movieOption.innerHTML = `
+                    ${posterUrl 
+                        ? `<img src="${posterUrl}" alt="${pelicula.title}" class="tmdb-movie-poster">`
+                        : '<div class="tmdb-movie-poster no-poster">Sin poster</div>'
+                    }
+                    <div class="tmdb-movie-info">
+                        <div class="tmdb-movie-title">${pelicula.title}</div>
+                        <div class="tmdb-movie-year">${pelicula.year || (pelicula.release_date ? pelicula.release_date.split('-')[0] : 'Sin fecha')}</div>
+                        <div class="tmdb-movie-rating">★ ${pelicula.vote_average ? pelicula.vote_average.toFixed(1) : 'N/A'}</div>
+                    </div>
+                    <button type="button" class="tmdb-use-btn" onclick="usarDatosTMDB(${pelicula.tmdb_id || pelicula.id})">
+                        Usar datos
+                    </button>
+                `;
+                
+                resultsContainer.appendChild(movieOption);
+            });
+            
+            resultsContainer.style.display = 'block';
+        }
+
+        window.usarDatosTMDB = function(tmdbId) {
+            console.log('Usando TMDB ID:', tmdbId, 'Tipo:', typeof tmdbId); // Debug
+            // Obtener detalles completos de la película
+            fetch('/tmdb/ajax/obtener-detalles/?' + new URLSearchParams({
+                tmdb_id: tmdbId
+            }), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                console.log('Detalles response status:', response.status); // Debug
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Detalles response:', data); // Debug
+                if (data.success && data.detalles) {
+                    console.log('Autocompletando con:', data.detalles); // Debug
+                    autocompletarFormulario(data.detalles);
+                    
+                    // Marcar la película seleccionada
+                    document.querySelectorAll('.tmdb-movie-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    document.querySelector(`[data-tmdb-id="${tmdbId}"]`).classList.add('selected');
+                    
+                    // Actualizar contador tras obtener detalles
+                    loadTMDBCounter();
+                    
+                    showMessage('¡Datos autocompletados correctamente! Revisa los campos y guarda la película.');
+                } else {
+                    console.log('Error en response:', data.message || 'Sin mensaje de error'); // Debug
+                    showMessage(`Error al obtener los detalles completos: ${data.message || 'Sin mensaje'}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error completo al obtener detalles:', error);
+                showMessage(`Error al obtener detalles de TMDB: ${error.message}`, 'error');
+            });
+        };
+
+        function autocompletarFormulario(detalles) {
+            console.log('Objeto detalles completo:', detalles); // Debug - ver toda la estructura
+            console.log('Propiedades disponibles:', Object.keys(detalles)); // Debug - ver las propiedades
+            
+            const camposFormulario = [
+                { campo: 'titulo', valor: detalles.title },
+                { campo: 'sinopsis', valor: detalles.overview },
+                { campo: 'año', valor: detalles.year },
+                { campo: 'duracion', valor: detalles.runtime },
+                { campo: 'director', valor: detalles.director },
+                { campo: 'reparto', valor: detalles.cast_string },
+                { campo: 'calificacion_oficial', valor: detalles.vote_average ? parseFloat(detalles.vote_average).toFixed(1) : null },
+                { campo: 'poster', valor: detalles.poster_url_medium || detalles.poster_url_large }
+            ];
+
+            camposFormulario.forEach(({ campo, valor }) => {
+                const input = document.getElementById(`id_${campo}`);
+                console.log(`Campo: ${campo}, Valor: "${valor}", Input encontrado: ${!!input}`); // Debug
+                if (input && valor) {
+                    input.value = valor;
+                    console.log(`✅ Campo ${campo} completado con: "${valor}"`); // Debug
+                    
+                    // Agregar efecto visual
+                    input.classList.add('field-updated');
+                    setTimeout(() => {
+                        input.classList.remove('field-updated');
+                    }, 2000);
+                    
+                    // Disparar evento change para que Django detecte el cambio
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // Mensaje final de éxito
+            const posterUrl = detalles.poster_url_medium || detalles.poster_url_large;
+            if (posterUrl) {
+                console.log(`📷 URL del poster incluida: ${posterUrl}`); // Debug
+            }
+
+            // Auto-seleccionar categorías basadas en géneros si es posible
+            if (detalles.generos && detalles.generos.length > 0) {
+                const categoriasSelect = document.getElementById('id_categorias_from');
+                if (categoriasSelect) {
+                    const primerGenero = detalles.generos[0].toLowerCase();
+                    
+                    // Mapeo simple de géneros TMDB a categorías del sistema
+                    const mapeoGeneros = {
+                        'action': ['accion', 'aventura'],
+                        'comedy': ['comedia'],
+                        'drama': ['drama'],
+                        'horror': ['terror'],
+                        'romance': ['romantica', 'romance'],
+                        'documentary': ['documentales'],
+                        'thriller': ['accion', 'suspenso'],
+                        'adventure': ['aventura', 'accion'],
+                        'animation': ['animacion', 'comedia'],
+                        'family': ['familiar', 'comedia']
+                    };
+                    
+                    const categoriasEncontradas = mapeoGeneros[primerGenero] || [];
+                    
+                    if (categoriasEncontradas.length > 0) {
+                        Array.from(categoriasSelect.options).forEach(option => {
+                            const textoOption = option.text.toLowerCase();
+                            if (categoriasEncontradas.some(cat => textoOption.includes(cat))) {
+                                option.selected = true;
+                            }
+                        });
+                        
+                        // Disparar evento change
+                        categoriasSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            }
+        }
+
+        // Event listeners
+        searchButton.addEventListener('click', buscarPeliculas);
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarPeliculas();
+            }
+        });
+
+        // Focus inicial en el campo de búsqueda
+        searchInput.focus();
+        
+        // Cargar contador de uso TMDB al inicializar
+        loadTMDBCounter();
+        
+    })(django.jQuery);
+    </script>
+{% endblock %}

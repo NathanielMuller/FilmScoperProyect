@@ -26,16 +26,24 @@ class PeliculaAdmin(admin.ModelAdmin):
     filter_horizontal = ['categorias']
     list_editable = ['activa']
     
+    # Medios personalizados para incluir CSS y JS
+    class Media:
+        css = {
+            'all': ('admin/css/tmdb_integration.css',)
+        }
+        js = ('admin/js/tmdb_integration.js',)
+    
     fieldsets = (
         ('Información Básica', {
             'fields': ('titulo', 'titulo_original', 'slug', 'año', 'duracion')
         }),
         ('Detalles', {
-            'fields': ('director', 'reparto', 'sinopsis', 'categorias')
+            'fields': ('director', 'reparto', 'sinopsis', 'categorias', 'calificacion_oficial')
         }),
         ('Imágenes', {
             'fields': ('poster', 'banner')
         }),
+
         ('Configuración', {
             'fields': ('activa',)
         }),
@@ -48,7 +56,7 @@ class PeliculaAdmin(admin.ModelAdmin):
     
     def get_poster_preview(self, obj):
         if obj.poster:
-            return format_html('<img src="{}" width="50" height="75" style="border-radius: 4px;" />', obj.poster.url)
+            return format_html('<img src="{}" width="50" height="75" style="border-radius: 4px;" />', obj.poster)
         return "Sin poster"
     get_poster_preview.short_description = 'Poster'
 
