@@ -30,22 +30,49 @@
 
 ### 🎯 **Información Esencial**
 - [👤 Usuarios de Prueba](#-usuarios-de-prueba-disponibles)
-- [🚀 Instalación Rápida](#-instalación-y-configuración)
-- [🎬 Nuevas Características TMDB](#-nuevas-características---integración-tmdb-api-octubre-2025)
+- [� Descripción General](#descripción)
+- [�🚀 Instalación Rápida](#-instalación-y-configuración)
+- [🎬 Últimas Actualizaciones](#-últimas-actualizaciones---octubre-2025)
 
 ### 📊 **Estado del Desarrollo**
+- [🎯 Alcance del Proyecto](#-alcance-y-estado-del-proyecto)
 - [✅ Funcionalidades Implementadas](#-funcionalidades-completamente-implementadas)
-- [⚠️ En Desarrollo](#️-funcionalidades-parcialmente-implementadas)
-- [🎯 Progreso vs Actividad](#-progreso-de-desarrollo---actividad-evaluativa)
+- [⚠️ Funcionalidades en Desarrollo](#️-funcionalidades-parcialmente-implementadas)
+- [📈 Progreso vs Actividad](#-progreso-de-desarrollo---actividad-evaluativa)
 
 ### 🛠️ **Documentación Técnica**
 - [🔧 Tecnologías Utilizadas](#-tecnologías-y-librerías-utilizadas)
 - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
 - [🔍 Comandos Útiles](#-comandos-útiles-para-desarrollo)
+- [🔌 APIs REST Completas](#-documentación-completa-de-apis-rest)
 
 ### 👨‍💻 **Para Desarrolladores**
 - [📞 Información del Desarrollador](#-información-del-desarrollador)
 - [📝 Notas de Implementación](#-notas-de-implementación)
+- [🎮 Uso de la Aplicación](#-uso-de-la-aplicación)
+- [🧪 Ejecutar Pruebas](#-ejecutar-pruebas)
+- [�️ Tecnologías y Dependencias](#️-tecnologías-y-dependencias)
+- [�📊 Modelos de Datos](#-modelos-de-datos)
+- [🚀 Despliegue en Producción](#-despliegue-en-producción)
+
+### 📋 **APIs y Servicios Externos**
+- [🎬 Sistema TMDB](#-sistema-de-trailers-oficial-con-tmdb)
+- [📺 YouTube API](#-youtube-data-api-v3)
+- [🔍 Endpoints de Películas](#️-endpoints-de-películas)
+- [⭐ Endpoints de Reseñas](#-endpoints-de-reseñas)
+- [📊 APIs de Estadísticas](#-endpoints-de-estadísticas)
+- [🌐 Servicios Externos](#-apis-de-servicios-externos)
+
+### 📚 **Información Adicional**
+- [🤝 Contribución](#-contribución)
+- [📄 Licencia](#-licencia)
+
+---
+
+### 🔗 **Navegación Interactiva**
+> **💡 Tip:** Todos los títulos de este README son enlaces clicables. Usa `Ctrl+Clic` para abrir en nueva pestaña.
+> 
+> **🧭 [Ir a Navegación Rápida](#-navegación-rápida)** | **📚 [Volver al Índice](#-índice)** | **🔝 [Ir al Inicio](#-filmscoper)**
 
 ---
 
@@ -450,6 +477,19 @@ FilmScoperProyect/
 - ✅ Sistema de señales Django para automatización
 - ✅ Template tags personalizados para funcionalidades específicas
 
+#### 🔌 **APIs REST Implementadas**
+- ✅ **Django REST Framework** completamente configurado
+- ✅ **20+ Endpoints REST** para acceso programático a datos
+- ✅ **Autenticación y Permisos** granulares por endpoint
+- ✅ **Paginación Automática** y filtros avanzados
+- ✅ **Documentación API** integrada con navegador web
+
+#### 📱 **APIs de Servicios Externos**
+- ✅ **TMDB Integration**: Búsqueda de portadas y metadatos de películas
+- ✅ **YouTube API**: Búsqueda y gestión de trailers oficiales
+- ✅ **Manejo de Errores**: Sistema robusto para APIs externas
+- ✅ **Caché Inteligente**: Optimización de llamadas a servicios externos
+
 ### ⚠️ **Funcionalidades en Desarrollo**
 - 🔍 **Sistema de Búsqueda**: Frontend implementado, backend pendiente
 - 🔧 **Filtros Avanzados**: UI creada, lógica de filtrado pendiente
@@ -524,6 +564,238 @@ Para utilizar los trailers, necesitas:
 - Usar variables de entorno para secrets
 - Configurar servidor web (Apache/Nginx + Gunicorn)
 - Configurar dominio y SSL
+
+---
+
+## 🔌 Documentación Completa de APIs REST
+
+### 📖 **Información General de la API**
+
+FilmScoper incluye una **API REST completa** desarrollada con **Django REST Framework** que permite acceso programático a todas las funcionalidades del sistema. La API está diseñada para ser **RESTful**, **escalable** y **fácil de integrar** con aplicaciones externas.
+
+**🌐 Base URL**: `http://127.0.0.1:8000/api/`
+
+### 🏗️ **Arquitectura de la API**
+
+#### **📡 Tecnologías Utilizadas**
+- **Django REST Framework**: Framework principal para APIs REST
+- **Session Authentication**: Para usuarios web autenticados
+- **Token Authentication**: Para acceso programático (futuro)
+- **Paginación Automática**: 12 elementos por página por defecto
+- **Filtros y Búsqueda**: Integrados en todos los endpoints de listado
+
+#### **🔐 Autenticación y Permisos**
+- **Lectura Pública**: La mayoría de endpoints permiten lectura sin autenticación
+- **Escritura Autenticada**: Crear/modificar requiere usuario autenticado
+- **Permisos Granulares**: Diferentes niveles según el tipo de operación
+- **Validación Automática**: Solo autores pueden modificar su contenido
+
+### 🎬 **Endpoints de Películas**
+
+#### **📽️ Lista y Gestión de Películas**
+```http
+GET    /api/peliculas/                    # Lista todas las películas activas
+POST   /api/peliculas/                    # Crear nueva película (solo staff)
+GET    /api/peliculas/{slug}/             # Detalles de película específica
+PUT    /api/peliculas/{slug}/             # Actualizar película (solo staff)
+DELETE /api/peliculas/{slug}/             # Eliminar película (soft delete, solo staff)
+```
+
+**🔍 Filtros Disponibles para `/api/peliculas/`:**
+- `?search=termino` - Búsqueda en título, director, reparto, sinopsis
+- `?categorias__slug=accion` - Filtrar por categoría específica
+- `?año=2020` - Filtrar por año de producción
+- `?director=nombre` - Filtrar por director
+- `?ordering=-calificacion_promedio` - Ordenar por calificación descendente
+- `?page=2` - Navegación por páginas
+
+#### **📋 Películas por Categoría**
+```http
+GET    /api/peliculas/categoria/{categoria_slug}/    # Películas de categoría específica
+```
+
+#### **🔍 Búsqueda Avanzada**
+```http
+GET    /api/buscar/?q=termino&categoria=accion&año=2020&minimo_rating=4
+```
+
+### ⭐ **Endpoints de Reseñas**
+
+#### **📝 Gestión de Reseñas**
+```http
+GET    /api/reseñas/                      # Lista todas las reseñas activas
+POST   /api/reseñas/                      # Crear nueva reseña (autenticado)
+GET    /api/reseñas/{id}/                 # Detalles de reseña específica
+PUT    /api/reseñas/{id}/                 # Actualizar reseña (solo autor)
+DELETE /api/reseñas/{id}/                 # Eliminar reseña (solo autor)
+```
+
+#### **👤 Reseñas por Usuario y Película**
+```http
+GET    /api/reseñas/pelicula/{pelicula_slug}/    # Reseñas de película específica
+GET    /api/reseñas/usuario/{username}/          # Reseñas de usuario específico
+```
+
+**🎯 Características Especiales:**
+- **Validación Anti-Duplicados**: Un usuario solo puede reseñar una película una vez
+- **Actualización Automática**: Las calificaciones de películas se actualizan automáticamente
+- **Soft Delete**: Las reseñas eliminadas mantienen integridad referencial
+
+### 🏷️ **Endpoints de Categorías**
+
+```http
+GET    /api/categorias/                   # Lista todas las categorías disponibles
+```
+
+### 📊 **Endpoints de Estadísticas**
+
+#### **📈 Estadísticas Generales**
+```http
+GET    /api/estadisticas/peliculas/       # Estadísticas del sitio completo
+```
+
+**📋 Datos Incluidos:**
+- Total de películas activas
+- Películas por categoría
+- Promedio general de calificaciones
+- Película mejor calificada
+- Películas agregadas recientemente
+
+#### **👤 Estadísticas de Usuario**
+```http
+GET    /api/estadisticas/usuario/         # Estadísticas del usuario autenticado
+```
+
+**📋 Datos Personales:**
+- Total de reseñas realizadas
+- Promedio de calificaciones otorgadas
+- Cantidad de películas favoritas
+- Número de comentarios realizados
+
+### 🌐 **APIs de Servicios Externos**
+
+#### **🎬 TMDB (The Movie Database)**
+
+**🔍 Búsqueda de Portadas**
+```http
+GET    /api/tmdb/buscar-portadas/?titulo=inception&año=2010
+```
+
+**🖼️ Asignar Portada a Película**
+```http
+POST   /api/tmdb/asignar-portada/
+Content-Type: application/json
+
+{
+  "pelicula_id": 123,
+  "tmdb_poster_path": "/path/to/poster.jpg",
+  "tmdb_id": 456
+}
+```
+
+**🏆 Películas Populares TMDB**
+```http
+GET    /api/tmdb/populares/?page=1        # Películas populares de TMDB
+```
+
+#### **🎥 YouTube API para Trailers**
+
+**🔍 Búsqueda de Trailers**
+```http
+GET    /api/youtube/buscar-trailers/?movie_title=inception&year=2010
+```
+
+**📹 Detalles de Trailer Específico**
+```http
+GET    /api/youtube/trailer/?youtube_id=YoHD9XEInc0
+```
+
+**🎬 Trailer de Película**
+```http
+GET    /api/peliculas/{pelicula_id}/trailer/    # Info del trailer de una película específica
+```
+
+### 🎯 **Uso Práctico de las APIs**
+
+#### **🔧 Ejemplo de Integración**
+```javascript
+// Obtener películas de acción con alta calificación
+fetch('/api/peliculas/?categorias__slug=accion&ordering=-calificacion_promedio')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Películas de acción top:', data.results);
+  });
+
+// Crear una nueva reseña
+fetch('/api/reseñas/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': getCookie('csrftoken')  // Para usuarios web
+  },
+  body: JSON.stringify({
+    pelicula: 'pelicula-slug',
+    calificacion: 5,
+    comentario: 'Excelente película!'
+  })
+});
+```
+
+#### **📱 Casos de Uso Comunes**
+- **Apps Móviles**: Consumir datos para aplicaciones nativas
+- **Dashboards**: Crear paneles de control con estadísticas
+- **Integraciones**: Conectar con otros sistemas de películas
+- **Bots**: Automatizar gestión de contenido y moderación
+- **Análisis**: Extraer datos para análisis y reportes
+
+### 🛡️ **Seguridad y Validaciones**
+
+#### **🔒 Medidas de Seguridad Implementadas**
+- **CSRF Protection**: Protección contra ataques Cross-Site Request Forgery
+- **Permisos por Método**: GET público, POST/PUT/DELETE autenticados
+- **Validación de Propiedad**: Solo autores pueden modificar su contenido
+- **Rate Limiting**: Próxima implementación para prevenir abuso
+- **Sanitización**: Validación y limpieza automática de datos de entrada
+
+#### **⚠️ Limitaciones Actuales**
+- **Autenticación Simple**: Solo Session Auth (Token Auth planeado)
+- **Rate Limiting**: No implementado aún
+- **Versionado**: API v1 implícita (versionado formal futuro)
+
+### 📚 **APIs Externas Integradas**
+
+#### **🎬 TMDB (The Movie Database) API v3**
+**Propósito**: Obtener metadatos oficiales de películas
+- **🔍 Funcionalidad**: Búsqueda de películas por título y año
+- **🖼️ Portadas**: URLs oficiales de posters en múltiples resoluciones
+- **📊 Calificaciones**: Ratings oficiales de TMDB para el sistema
+- **🎯 Uso**: Comando `actualizar_trailers_tmdb` para sincronización masiva
+- **💾 Cache**: Sistema de caché para optimizar llamadas repetidas
+
+#### **📺 YouTube Data API v3**
+**Propósito**: Gestión de trailers oficiales de películas
+- **🔍 Búsqueda**: Encontrar trailers oficiales por título de película
+- **📹 Metadatos**: Información detallada de videos (duración, calidad, etc.)
+- **🎬 Embedding**: URLs optimizadas para reproducción en iframe
+- **⚠️ Restricciones**: Manejo automático de limitaciones de reproducción
+- **🔄 Fallbacks**: Enlaces directos cuando el embed está restringido
+
+**🎯 Flujo de Trabajo Completo YouTube:**
+1. **Búsqueda Automática**: El sistema busca trailers por título + año
+2. **Validación de Calidad**: Filtra por palabras clave oficiales ("official", "trailer")
+3. **Almacenamiento**: Guarda YouTube ID en base de datos
+4. **Reproducción Inteligente**: Intenta embed, fallback a enlace directo
+5. **Actualizaciones**: Comando para actualizar trailers masivamente
+
+### 🔮 **Futuras Mejoras de la API**
+
+#### **🚀 Funcionalidades Planeadas**
+- **Token Authentication**: Autenticación por tokens para apps externas
+- **Rate Limiting**: Limitación de requests por usuario/IP
+- **API Versioning**: Versionado formal con `/api/v2/`
+- **WebSocket Support**: Actualizaciones en tiempo real
+- **GraphQL**: Endpoint GraphQL para queries flexibles
+- **Swagger/OpenAPI**: Documentación interactiva automática
 
 ---
 
@@ -753,6 +1025,28 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - [ ] **Tests de Integración**: Cobertura de testing al 90%+
 - [ ] **Documentación de API**: Swagger/OpenAPI documentation
 - [ ] **CI/CD Pipeline**: Automatización de despliegue
+
+---
+
+## 🧭 Navegación Rápida
+
+### 📖 **Enlaces Principales**
+- [🔝 Volver al Inicio](#-filmscoper)
+- [📚 Ver Índice Completo](#-índice)
+- [⚡ Instalación Rápida](#-instalación-y-configuración)
+- [👤 Usuarios de Prueba](#-usuarios-de-prueba-disponibles)
+
+### 🎯 **Secciones Técnicas**
+- [🔌 Documentación APIs REST](#-documentación-completa-de-apis-rest)
+- [🎬 Sistema TMDB Trailers](#-sistema-de-trailers-oficial-con-tmdb)
+- [📊 Estado del Proyecto](#-alcance-y-estado-del-proyecto)
+- [🔧 Tecnologías Utilizadas](#-tecnologías-y-librerías-utilizadas)
+
+### 👨‍💻 **Para Desarrolladores**
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🔍 Comandos Útiles](#-comandos-útiles-para-desarrollo)
+- [📝 Notas de Implementación](#-notas-de-implementación)
+- [📞 Info del Desarrollador](#-información-del-desarrollador)
 
 ---
 
