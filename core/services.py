@@ -280,6 +280,72 @@ class TMDBService:
         
         return complete_data
     
+    def get_movie_videos(self, tmdb_id):
+        """
+        Obtener videos/trailers de una película desde TMDB
+        
+        Args:
+            tmdb_id (int): ID de la película en TMDB
+            
+        Returns:
+            dict: Información de videos con el trailer principal
+        """
+        if not tmdb_id:
+            return None
+        
+        cache_key = f"tmdb_movie_videos_{tmdb_id}"
+        cached_result = cache.get(cache_key)
+        
+        if cached_result:
+            return cached_result
+        
+        # Obtener videos de la película
+        videos_data = self._make_request(f'/movie/{tmdb_id}/videos')
+        if not videos_data or 'results' not in videos_data:
+            return None
+        
+        videos = videos_data['results']
+        
+        # Filtrar solo videos de YouTube
+        youtube_videos = [
+            video for video in videos 
+            if video.get('site') == 'YouTube'
+        ]
+        
+        # Priorizar trailers oficiales
+        trailers = [
+            video for video in youtube_videos 
+            if video.get('type') == 'Trailer'
+        ]
+        
+        # Buscar trailer oficial primero
+        official_trailer = None
+        for trailer in trailers:
+            if trailer.get('official', False):
+                official_trailer = trailer
+                break
+        
+        # Si no hay trailer oficial, tomar el primer trailer
+        if not official_trailer and trailers:
+            official_trailer = trailers[0]
+        
+        # Si no hay trailers, tomar el primer video de YouTube
+        if not official_trailer and youtube_videos:
+            official_trailer = youtube_videos[0]
+        
+        result = {
+            'trailer_youtube_id': official_trailer.get('key') if official_trailer else None,
+            'trailer_name': official_trailer.get('name') if official_trailer else None,
+            'all_videos': youtube_videos,
+            'trailers_count': len(trailers),
+            'total_videos': len(youtube_videos)
+        }
+        
+        # Cachear por 24 horas
+        cache.set(cache_key, result, 60 * 60 * 24)
+        
+        return result
+    
     def get_popular_movies(self, page=1):
         """
         Obtener películas populares de TMDB
