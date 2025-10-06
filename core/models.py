@@ -34,9 +34,14 @@ class Pelicula(models.Model):
     # Categorías (una película puede tener múltiples géneros)
     categorias = models.ManyToManyField(Categoria, related_name='peliculas')
     
-    # Imágenes
+    # Imágenes y multimedia
     poster = models.URLField(blank=True, help_text="URL del poster desde TMDB")
     banner = models.ImageField(upload_to='peliculas/banners/', blank=True)
+    trailer_youtube_id = models.CharField(
+        max_length=20, 
+        blank=True, 
+        help_text="ID del trailer oficial en YouTube (ej: dQw4w9WgXcQ)"
+    )
     
     # Metadatos
     fecha_agregada = models.DateTimeField(auto_now_add=True)
@@ -111,6 +116,22 @@ class Pelicula(models.Model):
     def get_estrellas_filmscoper(self):
         """Devuelve las estrellas de FilmScoper directamente"""
         return float(self.calificacion_promedio) if self.calificacion_promedio > 0 else 0
+    
+    def get_trailer_embed_url(self):
+        """Devuelve la URL de embed para YouTube si hay trailer disponible"""
+        if self.trailer_youtube_id:
+            return f"https://www.youtube.com/embed/{self.trailer_youtube_id}"
+        return None
+    
+    def get_trailer_watch_url(self):
+        """Devuelve la URL directa de YouTube para ver el trailer"""
+        if self.trailer_youtube_id:
+            return f"https://www.youtube.com/watch?v={self.trailer_youtube_id}"
+        return None
+    
+    def has_trailer(self):
+        """Verifica si la película tiene un trailer disponible"""
+        return bool(self.trailer_youtube_id)
 
 # Perfil extendido del usuario
 class PerfilUsuario(models.Model):

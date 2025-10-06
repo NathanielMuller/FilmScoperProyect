@@ -68,7 +68,7 @@
 
 .tmdb-search-form {
     display: flex;
-    gap: 10px;
+    gap: 0;
     align-items: end;
     margin-bottom: 15px;
 }
@@ -88,20 +88,29 @@
     width: 100%;
     padding: 8px 12px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 4px 0 0 4px;
     font-size: 14px;
+    height: 36px;
+    box-sizing: border-box;
+    margin: 0;
+    vertical-align: bottom;
 }
 
 #btn-buscar-tmdb {
     background: #ff6b35;
     color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 4px;
+    border: 1px solid #ff6b35;
+    border-left: none;
+    padding: 0 20px;
+    border-radius: 0 4px 4px 0;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s;
     height: 36px;
+    box-sizing: border-box;
+    margin: 0;
+    vertical-align: bottom;
+    line-height: 34px;
 }
 
 #btn-buscar-tmdb:hover {

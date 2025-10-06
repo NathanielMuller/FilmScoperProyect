@@ -339,3 +339,319 @@ def get_poster_url(poster_path, size='medium'):
     
     size_code = TMDBService.POSTER_SIZES.get(size, 'w342')
     return f"{TMDBService.IMAGE_BASE_URL}/{size_code}{poster_path}"
+
+
+class YouTubeService:
+    """
+    Servicio para interactuar con YouTube Data API v3
+    Funcionalidades:
+    - Búsqueda de trailers oficiales por título de película
+    - Obtención de metadatos de videos
+    - Cache de resultados para optimizar rendimiento
+    """
+    
+    BASE_URL = "https://www.googleapis.com/youtube/v3"
+    
+    def __init__(self):
+        """Inicializar el servicio con la API key"""
+        self.api_key = getattr(settings, 'YOUTUBE_API_KEY', None)
+        if not self.api_key:
+            logger.warning("YOUTUBE_API_KEY no configurada en settings")
+    
+    def _make_request(self, endpoint, params=None):
+        """
+        Realizar petición HTTP a la API de YouTube
+        
+        Args:
+            endpoint (str): Endpoint de la API (ej: '/search')
+            params (dict): Parámetros adicionales para la consulta
+            
+        Returns:
+            dict: Respuesta JSON de la API o None si hay error
+        """
+        if not self.api_key:
+            logger.error("No se puede hacer petición sin YouTube API key")
+            return None
+        
+        # Preparar parámetros base
+        request_params = {
+            'key': self.api_key,
+        }
+        
+        # Agregar parámetros adicionales
+        if params:
+            request_params.update(params)
+        
+        try:
+            url = f"{self.BASE_URL}{endpoint}"
+            logger.info(f"Realizando petición a YouTube: {url}")
+            
+            response = requests.get(url, params=request_params, timeout=10)
+            response.raise_for_status()
+            
+            return response.json()
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error al consultar YouTube API: {str(e)}")
+            return None
+        except ValueError as e:
+            logger.error(f"Error al decodificar JSON de YouTube: {str(e)}")
+            return None
+    
+    def search_movie_trailer(self, movie_title, year=None, limit=10):
+        """
+        Buscar trailers de película en YouTube
+        
+        Args:
+            movie_title (str): Título de la película
+            year (int, optional): Año de la película para mejorar búsqueda
+            limit (int): Número máximo de resultados (default: 10)
+            
+        Returns:
+            list: Lista de trailers encontrados con metadatos
+        """
+        if not movie_title or not movie_title.strip():
+            return []
+        
+        # Crear clave de cache
+        cache_key = f"youtube_search_{movie_title.lower().replace(' ', '_')}_{year or 'any'}"
+        
+        # Intentar obtener desde cache
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            logger.info(f"Trailers obtenidos desde cache: {movie_title}")
+            return cached_result[:limit]
+        
+        # Intentar múltiples estrategias de búsqueda
+        trailers = []
+        
+        # Estrategia 1: Búsqueda con "official trailer"
+        query1 = f"{movie_title.strip()} official trailer"
+        if year:
+            query1 += f" {year}"
+        
+        trailers.extend(self._search_with_query(query1, limit=5))
+        
+        # Estrategia 2: Solo "trailer" si no encontramos suficientes
+        if len(trailers) < 3:
+            query2 = f"{movie_title.strip()} trailer"
+            if year:
+                query2 += f" {year}"
+            trailers.extend(self._search_with_query(query2, limit=5))
+        
+        # Estrategia 3: Búsqueda más amplia si aún no hay resultados
+        if len(trailers) < 1:
+            query3 = f"{movie_title.strip()}"
+            trailers.extend(self._search_with_query(query3, limit=3, filter_trailers=False))
+        
+        # Eliminar duplicados y filtrar
+        seen_ids = set()
+        unique_trailers = []
+        for trailer in trailers:
+            if trailer['youtube_id'] not in seen_ids:
+                seen_ids.add(trailer['youtube_id'])
+                unique_trailers.append(trailer)
+        
+        # Guardar en cache por 24 horas
+        cache.set(cache_key, unique_trailers, 86400)
+        
+        logger.info(f"Encontrados {len(unique_trailers)} trailers para '{movie_title}'")
+        return unique_trailers[:limit]
+    
+    def _search_with_query(self, query, limit=5, filter_trailers=True):
+        """
+        Realizar búsqueda con una query específica
+        """
+        # Parámetros de búsqueda más flexibles
+        params = {
+            'part': 'snippet',
+            'q': query,
+            'type': 'video',
+            'maxResults': limit,
+            'order': 'relevance',
+            'safeSearch': 'moderate',  # Menos restrictivo
+        }
+        
+        # Realizar petición
+        data = self._make_request('/search', params)
+        
+        if not data or 'items' not in data:
+            return []
+        
+        # Procesar resultados
+        trailers = []
+        for item in data['items']:
+            trailer_info = self._process_video_data(item)
+            if trailer_info:
+                # Si filter_trailers es False, agregar todos los videos
+                # Si es True, solo agregar si parece ser trailer
+                if not filter_trailers or self._is_likely_trailer(trailer_info, query):
+                    trailers.append(trailer_info)
+        
+        return trailers
+    
+    def _process_video_data(self, video_data):
+        """
+        Procesar datos de video desde YouTube API
+        
+        Args:
+            video_data (dict): Datos raw del video desde YouTube
+            
+        Returns:
+            dict: Información procesada del trailer
+        """
+        if not video_data or 'snippet' not in video_data:
+            return None
+        
+        snippet = video_data['snippet']
+        video_id = video_data['id'].get('videoId') if isinstance(video_data['id'], dict) else video_data['id']
+        
+        return {
+            'youtube_id': video_id,
+            'title': snippet.get('title', ''),
+            'description': snippet.get('description', ''),
+            'published_at': snippet.get('publishedAt', ''),
+            'channel_title': snippet.get('channelTitle', ''),
+            'thumbnail_url': snippet.get('thumbnails', {}).get('high', {}).get('url', ''),
+            'embed_url': f'https://www.youtube.com/embed/{video_id}',
+            'watch_url': f'https://www.youtube.com/watch?v={video_id}',
+            'channel_id': snippet.get('channelId', ''),
+        }
+    
+    def _is_likely_trailer(self, trailer_info, search_query):
+        """
+        Determinar si un video es probablemente un trailer
+        
+        Args:
+            trailer_info (dict): Información del trailer
+            search_query (str): Query de búsqueda original
+            
+        Returns:
+            bool: True si parece ser un trailer
+        """
+        title_lower = trailer_info['title'].lower()
+        description_lower = trailer_info['description'].lower()
+        
+        # Palabras clave que indican trailers
+        trailer_keywords = [
+            'trailer', 'official trailer', 'teaser', 'preview', 
+            'tráiler', 'avance', 'adelanto', 'película'
+        ]
+        
+        # Verificar si contiene palabras clave de trailer
+        has_trailer_keywords = any(keyword in title_lower for keyword in trailer_keywords)
+        
+        # Verificar si el título contiene parte del query de búsqueda
+        query_words = search_query.lower().split()
+        movie_words = [word for word in query_words if word not in ['trailer', 'official', 'tráiler']]
+        has_movie_reference = any(word in title_lower for word in movie_words)
+        
+        # Canales oficiales comunes (studios, distribuidores)
+        trusted_channels = [
+            'sony pictures', 'universal pictures', 'warner bros', 'disney', 'marvel',
+            'paramount pictures', '20th century', 'fox', 'lionsgate', 'netflix',
+            'amazon prime', 'hbo', 'hulu', 'sony', 'warner', 'universal', 'movieclips',
+            'trailers', 'entertainment', 'film', 'movie', 'cinema'
+        ]
+        
+        channel_lower = trailer_info['channel_title'].lower()
+        is_trusted_channel = any(channel in channel_lower for channel in trusted_channels)
+        
+        # Es probable trailer si:
+        # 1. Tiene palabras clave de trailer, O
+        # 2. Viene de canal confiable Y hace referencia a la película
+        return has_trailer_keywords or (is_trusted_channel and has_movie_reference)
+    
+    def _is_likely_official_trailer(self, trailer_info, movie_title):
+        """
+        Determinar si un video es probablemente un trailer oficial
+        
+        Args:
+            trailer_info (dict): Información del trailer
+            movie_title (str): Título original de la película
+            
+        Returns:
+            bool: True si parece ser un trailer oficial
+        """
+        title_lower = trailer_info['title'].lower()
+        movie_lower = movie_title.lower()
+        
+        # Criterios para identificar trailers oficiales
+        official_indicators = [
+            'official trailer' in title_lower,
+            'official' in title_lower and 'trailer' in title_lower,
+            'trailer' in title_lower and any(word in movie_lower for word in title_lower.split()),
+        ]
+        
+        # Canales oficiales comunes (studios, distributores)
+        trusted_channels = [
+            'sony pictures', 'universal pictures', 'warner bros', 'disney', 'marvel',
+            'paramount pictures', '20th century', 'fox', 'lionsgate', 'netflix',
+            'amazon prime', 'hbo', 'hulu', 'sony', 'warner', 'universal'
+        ]
+        
+        channel_lower = trailer_info['channel_title'].lower()
+        is_official_channel = any(channel in channel_lower for channel in trusted_channels)
+        
+        return any(official_indicators) or is_official_channel
+    
+    def get_video_details(self, youtube_id):
+        """
+        Obtener detalles específicos de un video de YouTube
+        
+        Args:
+            youtube_id (str): ID del video en YouTube
+            
+        Returns:
+            dict: Detalles completos del video
+        """
+        if not youtube_id:
+            return None
+        
+        cache_key = f"youtube_video_{youtube_id}"
+        cached_result = cache.get(cache_key)
+        
+        if cached_result:
+            return cached_result
+        
+        params = {
+            'part': 'snippet,statistics,contentDetails',
+            'id': youtube_id
+        }
+        
+        data = self._make_request('/videos', params)
+        
+        if not data or 'items' not in data or not data['items']:
+            return None
+        
+        video_item = data['items'][0]
+        details = self._process_detailed_video_data(video_item)
+        
+        # Guardar en cache por 24 horas
+        cache.set(cache_key, details, 86400)
+        return details
+    
+    def _process_detailed_video_data(self, video_data):
+        """Procesar datos detallados de video con estadísticas"""
+        snippet = video_data.get('snippet', {})
+        statistics = video_data.get('statistics', {})
+        content_details = video_data.get('contentDetails', {})
+        
+        return {
+            'youtube_id': video_data.get('id'),
+            'title': snippet.get('title', ''),
+            'description': snippet.get('description', ''),
+            'published_at': snippet.get('publishedAt', ''),
+            'channel_title': snippet.get('channelTitle', ''),
+            'duration': content_details.get('duration', ''),
+            'view_count': int(statistics.get('viewCount', 0)),
+            'like_count': int(statistics.get('likeCount', 0)),
+            'comment_count': int(statistics.get('commentCount', 0)),
+            'thumbnail_url': snippet.get('thumbnails', {}).get('high', {}).get('url', ''),
+            'embed_url': f'https://www.youtube.com/embed/{video_data.get("id")}',
+            'watch_url': f'https://www.youtube.com/watch?v={video_data.get("id")}',
+        }
+
+
+# Instancia global del servicio YouTube
+youtube_service = YouTubeService()

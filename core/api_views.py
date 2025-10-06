@@ -14,7 +14,7 @@ from .serializers import (
     ReseñaSerializer, ReseñaCreateSerializer, CategoriaSerializer,
     ComentarioPeliculaSerializer, PeliculaStatsSerializer, UsuarioStatsSerializer
 )
-from .services import tmdb_service
+from .services import tmdb_service, youtube_service
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -531,5 +531,141 @@ def peliculas_populares_tmdb(request):
     except Exception as e:
         return Response(
             {'error': f'Error al obtener películas populares: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ============ APIS DE YOUTUBE TRAILERS ============
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def buscar_trailers_youtube(request):
+    """
+    Buscar trailers de películas en YouTube
+    GET: /api/youtube/buscar-trailers/?movie_title=inception&year=2010
+    """
+    movie_title = request.GET.get('movie_title', '').strip()
+    year = request.GET.get('year', '')
+    
+    if not movie_title:
+        return Response(
+            {'error': 'El parámetro "movie_title" es requerido'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Convertir año a entero si se proporciona
+    year_int = None
+    if year:
+        try:
+            year_int = int(year)
+        except ValueError:
+            return Response(
+                {'error': 'El parámetro "year" debe ser un número válido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    try:
+        # Buscar trailers en YouTube
+        trailers = youtube_service.search_movie_trailer(movie_title, year_int)
+        
+        return Response({
+            'movie_title': movie_title,
+            'year': year_int,
+            'total_resultados': len(trailers),
+            'trailers': trailers
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error al consultar YouTube API: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def obtener_detalles_trailer(request):
+    """
+    Obtener detalles completos de un trailer específico
+    GET: /api/youtube/trailer/{youtube_id}/
+    """
+    youtube_id = request.GET.get('youtube_id', '').strip()
+    
+    if not youtube_id:
+        return Response(
+            {'error': 'El parámetro "youtube_id" es requerido'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        # Obtener detalles del trailer
+        detalles = youtube_service.get_video_details(youtube_id)
+        
+        if detalles:
+            return Response({
+                'youtube_id': youtube_id,
+                'detalles': detalles
+            })
+        else:
+            return Response(
+                {'error': 'Trailer no encontrado o no disponible'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Error al obtener detalles del trailer: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
+def trailers_pelicula(request, pelicula_id):
+    """
+    Obtener información de trailer de una película específica
+    GET: /api/peliculas/{id}/trailer/
+    """
+    try:
+        pelicula = Pelicula.objects.get(id=pelicula_id, activa=True)
+        
+        if pelicula.trailer_youtube_id:
+            # Obtener detalles completos del trailer
+            detalles_trailer = youtube_service.get_video_details(pelicula.trailer_youtube_id)
+            
+            trailer_info = {
+                'pelicula': {
+                    'id': pelicula.id,
+                    'titulo': pelicula.titulo,
+                    'año': pelicula.año,
+                },
+                'trailer': {
+                    'youtube_id': pelicula.trailer_youtube_id,
+                    'embed_url': pelicula.get_trailer_embed_url(),
+                    'watch_url': pelicula.get_trailer_watch_url(),
+                    'detalles': detalles_trailer
+                }
+            }
+            
+            return Response(trailer_info)
+        else:
+            return Response({
+                'pelicula': {
+                    'id': pelicula.id,
+                    'titulo': pelicula.titulo,
+                    'año': pelicula.año,
+                },
+                'trailer': None,
+                'message': 'Esta película no tiene trailer disponible'
+            })
+        
+    except Pelicula.DoesNotExist:
+        return Response(
+            {'error': 'Película no encontrada'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Error al procesar la solicitud: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

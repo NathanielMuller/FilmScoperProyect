@@ -159,9 +159,13 @@ REST_FRAMEWORK = {
 }
 
 # TMDB API Configuration
-# Obtén tu API key gratis en: https://www.themoviedb.org/settings/api
-TMDB_API_KEY = '3eb3e8f70ed1682487eb2cc3e1862f67'  # Reemplazar con tu API key real
+
+TMDB_API_KEY = '3eb3e8f70ed1682487eb2cc3e1862f67'  #
 TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZWIzZThmNzBlZDE2ODI0ODdlYjJjYzNlMTg2MmY2NyIsIm5iZiI6MTc1OTcwODYyMC4wNTcsInN1YiI6IjY4ZTMwNWNjOWZlOTYyMDQzOTM2ZTY1YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.IeQX_gA4vMR34MkYsTJkKZq0_IOGEUZGuoUuO3rk5tI'  # Token de acceso (opcional)
+
+# YouTube Data API v3 Configuration
+
+YOUTUBE_API_KEY = 'AIzaSyAmikj-s4GRtGDkAYY9A-s_WltPBrQUXiA'  
 
 # Cache Configuration (para optimizar consultas a APIs externas)
 CACHES = {

@@ -7,7 +7,7 @@ import json
 
 from .models import Pelicula, Categoria
 from .forms import PeliculaForm
-from .services import tmdb_service
+from .services import tmdb_service, youtube_service
 from datetime import datetime, date
 from django.core.cache import cache
 
@@ -267,5 +267,103 @@ def ajax_tmdb_usage_counter(request):
         'status': status,
         'percentage': round(usage_percentage, 1)
     })
+
+
+# ========== VISTAS PARA YOUTUBE API ==========
+
+@staff_member_required
+@csrf_exempt
+def ajax_buscar_trailer_youtube(request):
+    """
+    Vista AJAX para buscar trailers en YouTube
+    """
+    if request.method == 'GET':
+        movie_title = request.GET.get('movie_title', '').strip()
+        year = request.GET.get('year', '')
+        
+        if not movie_title:
+            return JsonResponse({
+                'success': False,
+                'message': 'El título de la película es requerido'
+            })
+        
+        try:
+            print(f"🎬 DEBUG: Buscando trailer para '{movie_title}', año: '{year}'")
+            
+            # Convertir año a entero si se proporciona
+            year_int = None
+            if year:
+                try:
+                    year_int = int(year)
+                except ValueError:
+                    pass
+            
+            # Buscar trailers en YouTube
+            print(f"🎬 DEBUG: Llamando a youtube_service.search_movie_trailer('{movie_title}', {year_int})")
+            trailers = youtube_service.search_movie_trailer(movie_title, year_int)
+            print(f"🎬 DEBUG: Trailers encontrados: {len(trailers) if trailers else 0}")
+            
+            if trailers:
+                return JsonResponse({
+                    'success': True,
+                    'trailers': trailers,
+                    'total': len(trailers),
+                    'message': f'Se encontraron {len(trailers)} trailers'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No se encontraron trailers oficiales en YouTube'
+                })
+                
+        except Exception as e:
+            print(f"❌ DEBUG: Error al buscar trailer: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error al buscar trailers: {str(e)}'
+            })
     
-    return render(request, 'core/admin/agregar_pelicula_tmdb.html', context)
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
+
+@staff_member_required
+def ajax_obtener_detalles_trailer(request):
+    """
+    Vista AJAX para obtener detalles específicos de un trailer de YouTube
+    """
+    if request.method == 'GET':
+        youtube_id = request.GET.get('youtube_id', '').strip()
+        
+        if not youtube_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'YouTube ID requerido'
+            })
+        
+        try:
+            print(f"🎥 DEBUG: Obteniendo detalles del trailer: {youtube_id}")
+            
+            # Obtener detalles del video
+            detalles = youtube_service.get_video_details(youtube_id)
+            print(f"🎥 DEBUG: Detalles obtenidos: {detalles is not None}")
+            
+            if detalles:
+                return JsonResponse({
+                    'success': True,
+                    'detalles': detalles,
+                    'message': 'Detalles del trailer obtenidos exitosamente'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No se pudieron obtener los detalles del trailer'
+                })
+                
+        except Exception as e:
+            print(f"❌ DEBUG: Error al obtener detalles del trailer: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': f'Error al obtener detalles: {str(e)}'
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})

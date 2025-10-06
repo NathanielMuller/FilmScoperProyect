@@ -312,7 +312,7 @@ class PeliculaForm(forms.ModelForm):
         fields = [
             'titulo', 'sinopsis', 'año', 'duracion', 
             'director', 'reparto', 'categorias', 
-            'calificacion_oficial', 'poster'
+            'calificacion_oficial', 'poster', 'trailer_youtube_id'
         ]
         widgets = {
             'titulo': forms.TextInput(attrs={
@@ -358,6 +358,10 @@ class PeliculaForm(forms.ModelForm):
             'poster': forms.URLInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'https://image.tmdb.org/t/p/w500/...'
+            }),
+            'trailer_youtube_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: dQw4w9WgXcQ (ID del video de YouTube)'
             })
         }
     

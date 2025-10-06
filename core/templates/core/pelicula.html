@@ -105,9 +105,15 @@
 
                         <!-- Botones de acción compactos -->
                         <div class="d-flex gap-2 align-items-center flex-wrap mb-3">
-                            <button class="btn btn-primary btn-sm">
-                                🎬 Trailer
-                            </button>
+                            {% if pelicula.has_trailer %}
+                                <button class="btn btn-success btn-sm" id="btn-ver-trailer" data-pelicula-id="{{ pelicula.id }}" data-trailer-id="{{ pelicula.trailer_youtube_id }}">
+                                    🎬 Ver Trailer
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    🎬 Sin Trailer
+                                </button>
+                            {% endif %}
                             {% if user.is_authenticated %}
                                 <button class="btn btn-outline-secondary btn-sm" id="btn-favorito" data-pelicula-id="{{ pelicula.id }}">
                                     ❤️ Favoritos
@@ -397,6 +403,45 @@
     {% endif %}
 </div>
 
+<!-- Modal para reproductor de trailer -->
+<div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trailerModalLabel">🎬 Trailer: {{ pelicula.titulo }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="ratio ratio-16x9">
+                    <iframe 
+                        id="trailer-iframe" 
+                        src="" 
+                        title="Trailer de {{ pelicula.titulo }}"
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="d-flex justify-content-between w-100">
+                    <div>
+                        <small class="text-muted">Proporcionado por YouTube</small>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        {% if pelicula.get_trailer_watch_url %}
+                            <a href="{{ pelicula.get_trailer_watch_url }}" target="_blank" class="btn btn-primary">
+                                <i class="fab fa-youtube"></i> Ver en YouTube
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Funciones para favoritos y ver más tarde
 document.addEventListener('DOMContentLoaded', function() {
@@ -415,6 +460,17 @@ document.addEventListener('DOMContentLoaded', function() {
         btnVerMasTarde.addEventListener('click', function() {
             const peliculaId = this.getAttribute('data-pelicula-id');
             toggleVerMasTarde(peliculaId);
+        });
+    }
+
+    // Botón de ver trailer
+    const btnVerTrailer = document.getElementById('btn-ver-trailer');
+    if (btnVerTrailer) {
+        btnVerTrailer.addEventListener('click', function() {
+            const trailerId = this.getAttribute('data-trailer-id');
+            if (trailerId) {
+                mostrarTrailer(trailerId);
+            }
         });
     }
 
@@ -922,6 +978,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Función para mostrar trailer en modal
+function mostrarTrailer(youtubeId) {
+    const trailerModal = new bootstrap.Modal(document.getElementById('trailerModal'));
+    const trailerIframe = document.getElementById('trailer-iframe');
+    
+    // Configurar URL del iframe con autoplay
+    const embedUrl = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`;
+    trailerIframe.src = embedUrl;
+    
+    // Mostrar modal
+    trailerModal.show();
+    
+    // Limpiar iframe cuando se cierre el modal
+    document.getElementById('trailerModal').addEventListener('hidden.bs.modal', function () {
+        trailerIframe.src = '';
+    }, { once: true });
+}
 
 // Función para mostrar/ocultar formularios de respuesta
 function toggleFormularioRespuesta(comentarioId) {

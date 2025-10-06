@@ -87,6 +87,23 @@ urlpatterns = [
          name='tmdb-populares'),
     
     
+    # ============ ENDPOINTS DE YOUTUBE TRAILERS ============
+    # Búsqueda de trailers en YouTube
+    path('youtube/buscar-trailers/', 
+         api_views.buscar_trailers_youtube, 
+         name='youtube-buscar-trailers'),
+    
+    # Detalles de trailer específico
+    path('youtube/trailer/', 
+         api_views.obtener_detalles_trailer, 
+         name='youtube-detalles-trailer'),
+    
+    # Trailer de película específica
+    path('peliculas/<int:pelicula_id>/trailer/', 
+         api_views.trailers_pelicula, 
+         name='pelicula-trailer'),
+    
+    
     # ============ BROWSABLE API ROOT ============
     # Navegador de API de Django REST Framework
     path('', include('rest_framework.urls')),

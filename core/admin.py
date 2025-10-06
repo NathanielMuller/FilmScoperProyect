@@ -40,8 +40,8 @@ class PeliculaAdmin(admin.ModelAdmin):
         ('Detalles', {
             'fields': ('director', 'reparto', 'sinopsis', 'categorias', 'calificacion_oficial')
         }),
-        ('Imágenes', {
-            'fields': ('poster', 'banner')
+        ('Imágenes y Multimedia', {
+            'fields': ('poster', 'banner', 'trailer_youtube_id')
         }),
 
         ('Configuración', {

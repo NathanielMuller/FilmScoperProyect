@@ -44,4 +44,8 @@ urlpatterns = [
     path('tmdb/ajax/asignar-portada/', tmdb_views.ajax_asignar_portada, name='tmdb_ajax_asignar'),
     path('tmdb/ajax/obtener-detalles/', tmdb_views.ajax_obtener_detalles_completos, name='tmdb_ajax_detalles'),
     path('tmdb/ajax/usage-counter/', tmdb_views.ajax_tmdb_usage_counter, name='tmdb_ajax_usage_counter'),
+    
+    # URLs para integración YouTube (solo para staff)
+    path('youtube/ajax/buscar-trailer/', tmdb_views.ajax_buscar_trailer_youtube, name='youtube_ajax_buscar_trailer'),
+    path('youtube/ajax/detalles-trailer/', tmdb_views.ajax_obtener_detalles_trailer, name='youtube_ajax_detalles_trailer'),
 ]

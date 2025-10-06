@@ -278,6 +278,11 @@
                 { campo: 'calificacion_oficial', valor: detalles.vote_average ? parseFloat(detalles.vote_average).toFixed(1) : null },
                 { campo: 'poster', valor: detalles.poster_url_medium || detalles.poster_url_large }
             ];
+            
+            // Buscar trailer automáticamente
+            if (detalles.title && detalles.year) {
+                buscarTrailerYoutube(detalles.title, detalles.year);
+            }
 
             camposFormulario.forEach(({ campo, valor }) => {
                 const input = document.getElementById(`id_${campo}`);
@@ -352,6 +357,45 @@
         // Focus inicial en el campo de búsqueda
         searchInput.focus();
         
+        // Función para buscar trailer en YouTube automáticamente
+        function buscarTrailerYoutube(titulo, año) {
+            console.log(`🎬 Buscando trailer para: ${titulo} (${año})`);
+            
+            fetch('/youtube/ajax/buscar-trailer/?' + new URLSearchParams({
+                movie_title: titulo,
+                year: año
+            }), {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.trailers && data.trailers.length > 0) {
+                    const mejorTrailer = data.trailers[0]; // El primer resultado suele ser el mejor
+                    const trailerInput = document.getElementById('id_trailer_youtube_id');
+                    
+                    if (trailerInput && mejorTrailer.youtube_id) {
+                        trailerInput.value = mejorTrailer.youtube_id;
+                        trailerInput.classList.add('field-updated');
+                        setTimeout(() => {
+                            trailerInput.classList.remove('field-updated');
+                        }, 2000);
+                        
+                        console.log(`✅ Trailer encontrado: ${mejorTrailer.title}`);
+                        console.log(`🎥 YouTube ID: ${mejorTrailer.youtube_id}`);
+                    }
+                } else {
+                    console.log('ℹ️ No se encontraron trailers para esta película');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error al buscar trailer:', error);
+            });
+        }
+
         // Cargar contador de uso TMDB al inicializar
         loadTMDBCounter();
         
