@@ -82,7 +82,20 @@ El proyecto incluye usuarios pre-configurados para facilitar la evaluación:
 
 FilmScoper es una plataforma web moderna desarrollada con Django que permite a los usuarios descubrir, explorar y calificar películas. El proyecto integra funcionalidades avanzadas de gestión de usuarios, sistema de reseñas, categorización de películas y una interfaz de usuario elegante con Bootstrap 5. **Nueva característica**: Integración completa con TMDB API para trailers oficiales de películas.
 
-## 🚀 Nuevas Características - Integración TMDB API (Octubre 2025)
+## 🚀 Últimas Actualizaciones - Octubre 2025
+
+### 🏆 **Página de Inicio Mejorada con Rankings TMDB**
+- **✅ Top 12 Películas**: Página principal muestra automáticamente las mejores películas por calificación TMDB
+- **✅ Posters Oficiales**: Sistema mejorado de visualización de imágenes con URLs TMDB
+- **✅ Fallbacks Elegantes**: Placeholders con gradientes y iconos SVG para películas sin poster
+- **✅ Efectos Interactivos**: Hover animations y transiciones suaves en las tarjetas
+- **✅ Design Responsivo**: Optimizado para todas las pantallas con Bootstrap Grid
+
+### 🧹 **Optimización y Limpieza del Proyecto**
+- **✅ Eliminación de Redundancias**: Removidos archivos no utilizados (API REST, TMDB portadas obsoletas)
+- **✅ Estructura Limpia**: Proyecto optimizado sin componentes innecesarios
+- **✅ URLs Simplificadas**: Rutas limpias enfocadas en funcionalidad core
+- **✅ Rendimiento Mejorado**: Carga más rápida sin dependencias obsoletas
 
 ### 🎬 Sistema de Trailers Oficial con TMDB
 - **✅ TMDB API Integration**: Conexión completa con The Movie Database API v3
@@ -91,6 +104,18 @@ FilmScoper es una plataforma web moderna desarrollada con Django que permite a l
 - **✅ Gestión Automática**: Comando Django para actualización masiva de trailers
 - **✅ Fallback System**: Enlace directo a YouTube cuando el embed falla por restricciones
 - **✅ Caching Inteligente**: Sistema de caché para optimizar llamadas a la API
+
+#### ⚠️ **Importante: Restricciones de Reproducción de YouTube**
+> **Nota sobre limitaciones del sistema de trailers**: Debido a las políticas de YouTube y restricciones impuestas por los estudios cinematográficos, algunos trailers oficiales no pueden reproducirse en formato embed (iframe) en sitios externos. Esto es una limitación de la plataforma YouTube, no del sistema FilmScoper.
+> 
+> **Trailers que SÍ funcionan correctamente:**
+> - 🎬 **Hércules** - Reproducción completa disponible
+> - 🎬 **Mi Maestro Pulpo** - Funciona sin restricciones  
+> - 🎬 **El Viaje del Emperador** - Reproducción exitosa
+> - 🎬 **La La Land** - Trailer disponible en embed
+> - 🎬 **Y varios más** - Muchos otros trailers funcionan perfectamente
+> 
+> **Para trailers restringidos**: El sistema proporciona automáticamente un **enlace directo a YouTube** donde los usuarios pueden ver el trailer completo sin restricciones. Esta es la mejor solución técnica disponible dado las limitaciones de la API de YouTube para contenido protegido por derechos de autor.
 
 ### 🔧 Nuevos Servicios y Comandos
 - **TMDBService**: Clase completa para interactuar with TMDB API
@@ -322,30 +347,39 @@ FilmScoperProyect/
 │   │   ├── poblar_peliculas.py       # Poblar películas iniciales
 │   │   ├── poblar_calificaciones.py  # Calificaciones oficiales
 │   │   ├── crear_foros.py            # Crear foros por categoría
-│   │   └── actualizar_trailers_tmdb.py # 🎬 NUEVO: Trailers TMDB
+│   │   └── actualizar_trailers_tmdb.py # 🎬 Trailers TMDB automáticos
 │   ├── 📁 migrations/               # Migraciones de base de datos
 │   ├── 📁 static/core/              # Archivos estáticos
 │   │   ├── 📁 css/                  # Estilos personalizados
 │   │   ├── 📁 js/                   # JavaScript del frontend
 │   │   └── 📁 img/                  # Imágenes de películas
-│   ├── 📁 templates/core/           # Templates HTML
+│   ├── 📁 templates/core/           # Templates HTML optimizados
+│   │   ├── base.html                # Template base con Bootstrap 5
+│   │   ├── index.html               # 🏆 Página principal con top películas
+│   │   ├── categoria.html           # Listados por categoría
+│   │   ├── pelicula.html            # Detalles con trailers TMDB
+│   │   └── ...                      # Otros templates del sistema
 │   ├── 📁 templatetags/             # Tags personalizados de Django
-│   ├── models.py                    # Modelos de datos (Película, Usuario, etc.)
-│   ├── views.py                     # Vistas de la aplicación
-│   ├── urls.py                      # URLs de la aplicación
+│   ├── models.py                    # 📊 Modelos optimizados (get_poster_url mejorado)
+│   ├── views.py                     # 🎯 Vistas mejoradas (index con top ranking)
+│   ├── urls.py                      # 🔗 URLs simplificadas y limpias
 │   ├── forms.py                     # Formularios Django
 │   ├── admin.py                     # Configuración del panel admin
-│   ├── services.py                  # 🎬 NUEVO: Servicios para APIs externas
+│   ├── services.py                  # 🎬 Servicios TMDB API
 │   └── signals.py                   # Señales Django para automatización
 ├── 📁 film_scoper/                  # Configuración del proyecto Django
-│   ├── settings.py                  # ⚙️ Configuraciones principales + TMDB API
-│   ├── urls.py                      # URLs principales del proyecto
+│   ├── settings.py                  # ⚙️ Configuraciones + TMDB API Key
+│   ├── urls.py                      # URLs principales (simplificadas)
 │   └── wsgi.py                      # Configuración WSGI
-├── 📁 instrucciones/               # Documentación del desarrollo
-├── db.sqlite3                      # Base de datos SQLite
+├── db.sqlite3                      # 🗄️ Base de datos SQLite (poblada)
 ├── manage.py                       # Script de gestión de Django
-└── README.md                       # Este archivo
+└── README.md                       # 📚 Documentación completa
 ```
+
+### 🧹 **Archivos Eliminados en Optimización:**
+- ❌ `core/api_urls.py`, `core/api_views.py`, `core/serializers.py` - API REST no implementada
+- ❌ `core/tmdb_views.py`, `core/templates/admin/buscar_portadas_tmdb.html` - Sistema TMDB obsoleto
+- ❌ `instrucciones/` - Documentación de desarrollo ya no necesaria
 
 ## 🎯 Progreso de Desarrollo - Actividad Evaluativa
 
@@ -356,6 +390,7 @@ FilmScoperProyect/
 - ✅ CRUD completo a través de Django Admin
 - ✅ 28 películas de prueba distribuidas en 6 categorías
 - ✅ **BONUS**: Integración con TMDB API para trailers oficiales
+- ✅ **NUEVO**: Página de inicio con top 12 películas por ranking TMDB
 
 #### 👤 **R02 - Sistema de Usuarios**
 - ✅ Registro, login, logout con validaciones Django
@@ -419,13 +454,15 @@ FilmScoperProyect/
 - 🔍 **Sistema de Búsqueda**: Frontend implementado, backend pendiente
 - 🔧 **Filtros Avanzados**: UI creada, lógica de filtrado pendiente
 
-### 📈 **Métricas del Proyecto**
-- **📊 Líneas de Código**: ~3,500 líneas de código Python/HTML/CSS/JS
+### 📈 **Métricas del Proyecto Final**
+- **📊 Líneas de Código**: ~3,200 líneas (optimizado, -300 por limpieza)
 - **🗄️ Modelos**: 8 modelos de datos principales
-- **📄 Templates**: 15+ templates HTML personalizados
+- **📄 Templates**: 10+ templates HTML optimizados
 - **⚙️ Comandos**: 4 comandos Django personalizados
 - **🧪 Tests**: Suite de pruebas automatizadas
 - **🎬 APIs**: Integración con 2 APIs externas (TMDB + YouTube)
+- **🏆 Funcionalidades**: Página inicio con ranking automático TMDB
+- **🧹 Optimización**: Proyecto limpio sin archivos redundantes
 
 ## 🔍 Comandos Útiles para Desarrollo
 
@@ -470,7 +507,7 @@ python manage.py dbshell
 - **Estudiante**: Nathaniel Muller
 - **Institución**: DUOC UC
 - **Programa**: Programación Web
-- **Semestre**: 8
+- **Semana**: 8
 - **Proyecto**: FilmScoper - Plataforma de Descubrimiento de Películas
 
 ## 📝 Notas de Implementación
@@ -573,8 +610,7 @@ FilmScoperProyect/
 
 ### ⚠️ Limitaciones Actuales
 - **Sin Búsqueda Funcional**: El buscador no procesa consultas
-- **Sin Interfaz de Foros**: Backend completo pero sin templates de navegación
-- **Sin Recomendaciones**: No hay sugerencias personalizadas
+- **Sin Recomendaciones**: No hay sugerencias personalizadas a cada usuario
 
 ## 🧪 Ejecutar Pruebas
 

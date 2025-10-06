@@ -10,8 +10,18 @@ from .models import Pelicula, Categoria, Reseña, PerfilUsuario, ComentarioPelic
 
 
 def index(request):
-    """Vista para la página principal"""
-    return render(request, 'core/index.html')
+    """Vista para la página principal con películas mejor rankeadas"""
+    # Obtener las 12 películas mejor rankeadas según TMDB (calificacion_oficial)
+    peliculas_top_ranked = Pelicula.objects.filter(
+        activa=True,
+        calificacion_oficial__gt=0  # Solo películas con calificación oficial
+    ).order_by('-calificacion_oficial')[:12]
+    
+    context = {
+        'peliculas_destacadas': peliculas_top_ranked,
+    }
+    
+    return render(request, 'core/index.html', context)
 
 
 def categoria(request, categoria_slug):
