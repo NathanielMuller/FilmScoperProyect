@@ -22,7 +22,7 @@
 
 [� Ir a Instalación](#-instalación-y-configuración) • [📊 Ver Características](#-funcionalidades-completamente-implementadas) • [�🎬 Trailers TMDB](#-sistema-de-trailers-oficial-con-tmdb) • [👤 Usuarios de Prueba](#-usuarios-de-prueba-disponibles)
 
-</div>
+
 
 ---
 
