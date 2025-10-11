@@ -2,7 +2,10 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn film_scoper.wsgi"
+startCommand = "python manage.py migrate --run-syncdb && python manage.py collectstatic --noinput && gunicorn film_scoper.wsgi --bind 0.0.0.0:$PORT --timeout 120"
 healthcheckPath = "/"
-healthcheckTimeout = 100
+healthcheckTimeout = 300
 restartPolicyType = "always"
+
+[build.nixpacksConfig]
+pythonVersion = "3.11"
