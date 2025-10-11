@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hp9@lcc@^v(8mv%$69$(=po7l$fu2a6wiop#d9$x)e!gf^d!$j'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-hp9@lcc@^v(8mv%$69$(=po7l$fu2a6wiop#d9$x)e!gf^d!$j')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos en producción
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -123,6 +126,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Configuración para WhiteNoise (servir archivos estáticos en producción)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files (user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -159,13 +165,11 @@ REST_FRAMEWORK = {
 }
 
 # TMDB API Configuration
-
-TMDB_API_KEY = '3eb3e8f70ed1682487eb2cc3e1862f67'  #
-TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZWIzZThmNzBlZDE2ODI0ODdlYjJjYzNlMTg2MmY2NyIsIm5iZiI6MTc1OTcwODYyMC4wNTcsInN1YiI6IjY4ZTMwNWNjOWZlOTYyMDQzOTM2ZTY1YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.IeQX_gA4vMR34MkYsTJkKZq0_IOGEUZGuoUuO3rk5tI'  # Token de acceso (opcional)
+TMDB_API_KEY = config('TMDB_API_KEY', default='3eb3e8f70ed1682487eb2cc3e1862f67')
+TMDB_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzZWIzZThmNzBlZDE2ODI0ODdlYjJjYzNlMTg2MmY2NyIsIm5iZiI6MTc1OTcwODYyMC4wNTcsInN1YiI6IjY4ZTMwNWNjOWZlOTYyMDQzOTM2ZTY1YiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.IeQX_gA4vMR34MkYsTJkKZq0_IOGEUZGuoUuO3rk5tI'
 
 # YouTube Data API v3 Configuration
-
-YOUTUBE_API_KEY = 'AIzaSyAmikj-s4GRtGDkAYY9A-s_WltPBrQUXiA'  
+YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', default='AIzaSyAmikj-s4GRtGDkAYY9A-s_WltPBrQUXiA')  
 
 # Cache Configuration (para optimizar consultas a APIs externas)
 CACHES = {

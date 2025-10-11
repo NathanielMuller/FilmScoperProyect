@@ -1,7 +1,7 @@
 from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django_filters.rest_framework import DjangoFilterBackend
@@ -390,7 +390,7 @@ def buscar_peliculas(request):
 # ============ APIS DE SERVICIOS EXTERNOS ============
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])  # Solo usuarios autenticados pueden buscar portadas
+@permission_classes([AllowAny])  # Permitir acceso público para demos
 def buscar_portadas_tmdb(request):
     """
     Buscar portadas de películas en TMDB
