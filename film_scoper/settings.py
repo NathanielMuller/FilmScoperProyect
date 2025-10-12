@@ -182,33 +182,3 @@ CACHES = {
         }
     }
 }
-
-# ============ CONFIGURACIÓN ESPECÍFICA PARA RAILWAY ============
-if 'RAILWAY_ENVIRONMENT' in os.environ or config('RAILWAY_ENVIRONMENT', default=False):
-    # Permitir todos los hosts en Railway (maneja el proxy automáticamente)
-    ALLOWED_HOSTS = ['*']
-    
-    # Configuración para HTTPS en Railway
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = False  # Railway maneja esto automáticamente
-    
-    # Configuraciones de seguridad para producción
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    
-    # Logging para Railway
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['console'],
-                'level': 'INFO',
-            },
-        },
-    }
